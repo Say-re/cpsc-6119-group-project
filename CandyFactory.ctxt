@@ -1,0 +1,8 @@
+#BlueJ class context
+comment0.target=CandyFactory
+comment0.text=\r\n\ \r\nAbstract\ Factory\ Interface\ -\ declares\ methods\ to\ creaete\ families\ of\ related\ objects\r\n\ @author\ (your\ name)\r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
+comment1.params=
+comment1.target=Candy\ createCandy()
+comment2.params=
+comment2.target=CandyPackage\ createPackage()
+numComments=3

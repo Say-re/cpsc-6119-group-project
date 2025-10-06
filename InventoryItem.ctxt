@@ -1,0 +1,12 @@
+#BlueJ class context
+comment0.target=InventoryItem
+comment0.text=\r\n\ Write\ a\ description\ of\ class\ InventoryItem\ here.\r\n\r\n\ @author\ (your\ name)\r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
+comment1.params=candy\ quantity
+comment1.target=InventoryItem(Candy,\ int)
+comment2.params=
+comment2.target=Candy\ getCandy()
+comment3.params=
+comment3.target=int\ getQuantity()
+comment4.params=amount
+comment4.target=void\ reduceQuantity(int)
+numComments=5

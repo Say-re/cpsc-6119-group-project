@@ -1,0 +1,15 @@
+#BlueJ class context
+comment0.target=Inventory
+comment1.params=
+comment1.target=Inventory()
+comment2.params=
+comment2.target=Inventory\ getInstance()
+comment3.params=candyName\ quantity
+comment3.target=void\ addCandy(java.lang.String,\ int)
+comment4.params=candyName\ quantity
+comment4.target=void\ removeCandy(java.lang.String,\ int)
+comment5.params=candyName
+comment5.target=int\ getStock(java.lang.String)
+comment6.params=
+comment6.target=void\ displayInventory()
+numComments=7

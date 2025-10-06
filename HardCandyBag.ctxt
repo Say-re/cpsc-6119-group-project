@@ -1,0 +1,8 @@
+#BlueJ class context
+comment0.target=HardCandyBag
+comment0.text=\r\n\ Write\ a\ description\ of\ class\ HardCandyBag\ here.\r\n\r\n\ @author\ (your\ name)\r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
+comment1.params=candy
+comment1.target=void\ pack(Candy)
+comment2.params=
+comment2.target=double\ getPrice()
+numComments=3
