@@ -1,5 +1,0 @@
-#BlueJ class context
-comment0.target=RegPricingCommand
-comment1.params=items
-comment1.target=double\ apply(java.util.List)
-numComments=2
