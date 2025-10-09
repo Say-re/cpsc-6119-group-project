@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=ShoppingCart
+comment1.params=candy
+comment1.target=void\ addItem(Candy)
+comment2.params=
+comment2.target=void\ viewCart()
+comment3.params=
+comment3.target=java.util.List\ getItems()
+numComments=4

@@ -1,9 +1,9 @@
-// CandyStoreApp.java
 public class CandyStoreApp {
     public static void main(String[] args) {
-        // Factories (Abstract Factory already exists)
+
+        // Create factories (Abstract Factory pattern already exists)
         CandyFactory chocolateFactory = new ChocolateCandyFactory();
-        CandyFactory gummyFactory     = new GummyCandyFactory();
+        CandyFactory gummyFactory = new GummyCandyFactory();
 
         // Create products
         Candy choco = chocolateFactory.createCandy();   // ChocolateCandy
