@@ -1,24 +1,21 @@
-
-/**
- * Write a description of class CandyStoreApp here.
- *
- * @author (your name)
- * @version (a version number or a date)
- */
-import java.util.List;
+//import java.util.List;
 import java.util.Scanner;
-public class CandyStoreApp
-{
-    public static void main(String[] args) {
-        CandyStore store = CandyStore.getInstance(); //Singleton Inventory
+public class CandyStoreApp {
+
+	public static void main(String[] args) {
+		CandyStore store = CandyStore.getInstance(); //Singleton Inventory
         Catalog catalogView = new Catalog();   // View Catalog
         ShoppingCart cart = new ShoppingCart(); // User's Cart
-               
+          
+        //added
+        ConsoleUI  ui = new ConsoleUI(store, catalogView, cart);
+        ui.run();
+        
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
         while (running){
             catalogView.showCatalog(store.getInventory());
-            System.out.print("\nEnter candy quantity to add to cart (0 to checkout): ");
+            System.out.print("\nEnter candy quantity to add to your cart (0 to checkout): ");
             int choice = scanner.nextInt();
             
             if (choice == 0){
@@ -54,7 +51,7 @@ public class CandyStoreApp
         }else {
             throw new IllegalArgumentException("No factory found for this candy: " + candy.getClass().getSimpleName());
         }
-    }
+
+	}
+
 }
-        
-    
