@@ -26,4 +26,9 @@ public class ShoppingCart
    public List<Candy> getItems(){
        return items;
    }
+
+    public void clear(){
+         items.clear();
+         System.out.println("Cart has been cleared.");
+    }
 }
