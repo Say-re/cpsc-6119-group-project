@@ -1,0 +1,455 @@
+
+public class BaseCandy implements Candy {
+	private String name;
+	private double price;
+	private double weight;
+	private int quantity;
+	
+	public BaseCandy(String name, double price, double weight, int quantity) {
+		this.name = name;
+		this.price = price;
+		this.weight = weight;
+		this.quantity = quantity;
+	}
+	@Override
+	public String getName() {
+		return name;
+	}
+	@Override
+	public double getWeight() {
+		return 0.0;
+	}
+	@Override 
+	public double getPrice() {
+		return price;
+	}
+	@Override
+	public int getQuantity() {
+		return quantity;
+	}
+	@Override
+	public void prepare() {
+		System.out.println("Preparing " + name + "candies.");
+	}
+}
+
+//Uses polymorphism --allows for different types of candy to be handled
+// Author: Kelly Payne 10/5/25
+public interface Candy {
+	String getName();
+    double getWeight();
+    double getPrice();
+    int getQuantity();
+    void prepare();
+}
+
+
+public interface CandyPackage {
+	void pack(Candy candy);
+    double getPrice();
+}
+
+import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.FileReader;
+import java.util.List;
+import com.opencsv.CSVReader;
+
+public class CandyStore {
+	private static CandyStore instance= null;
+	private List<Candy> catalog = new ArrayList<>();
+	private Inventory inventory = Inventory.getInstance();
+	   
+	   private CandyStore(){
+		   loadInventFromCSV("data.csv");
+	       
+	   }
+	   public void loadInventFromCSV(String filepath) {
+		   try (InputStream input = CandyStore.class.getResourceAsStream("/data.csv")){
+			   if (input == null) {
+				   System.err.println("File not found in classpath: /data.csv");
+				   loadDefaultCatalogAndInvent();
+				   return;
+			   }
+		   
+		   try (CSVReader reader = new CSVReader(new FileReader(filepath))){
+		   	   String[] line;
+			   reader.readNext();
+			   while ((line = reader.readNext()) != null) {
+				   if (line.length < 4) {
+					   continue; }
+				   
+				   String name = line[0].trim();
+				   String type = line[1].trim();
+				   double price = Double.parseDouble(line[2].trim());
+				   int stock = Integer.parseInt(line[3].trim());
+				   
+				   Candy candy = createCandy(name, type, price);
+				   catalog.add(candy);
+				   inventory.addCandy(candy.getName(), stock);
+				}
+			  }
+		   }catch (Exception e) {
+			   System.err.println("Error loading data from CSV: " + e.getMessage());
+			   e.printStackTrace();
+			   loadDefaultCatalogAndInvent();
+		  }
+		   System.out.println("Load inventory: " + catalog.size() + " candies");
+		}
+	   
+	   private Candy createCandy(String name, String type, double price) {
+		   String lowerName = name.toLowerCase();
+		   if (lowerName.contains("gummy")) {
+			   return new GummyCandy(name, price);
+		   }else if (lowerName.contains("chocolate")) {
+			   return new ChocolateCandy(name, price);
+		   }else if (lowerName.contains("hard")) {
+			   return new HardCandy(name, price);
+		   }else {
+			   return new BaseCandy(name, price);
+		   }
+	   }
+	   private void loadDefaultCatalogAndInvent() {
+		   Candy gummy = new GummyCandy("Gummy Bear", 1.00);
+		   Candy chocolate = new ChocolateCandy("Chocolate Bar", 1.50);
+		   Candy hard = new HardCandy("Lollipop", .50);
+		   catalog.add(gummy);
+		   catalog.add(chocolate);
+		   catalog.add(hard);
+		   inventory.addCandy(gummy.getName(), 15);
+		   inventory.addCandy(chocolate.getName(), 20);
+		   inventory.addCandy(hard.getName(), 10);
+	   }
+	   public static CandyStore getInstance(){
+	       if (instance == null){
+	           instance = new CandyStore();
+	       }
+	       return instance;
+	   }
+	   public List<Candy> getCatalog(){
+	       return catalog;
+	   }
+	   public List<InventoryItem> getInventory(){
+	       List<InventoryItem> inventoryItems = new ArrayList<>();
+	       for (Candy candy : catalog){
+	           int qty = inventory.getStock(candy.getName());
+	           inventoryItems.add(new InventoryItem(candy, qty));
+	       }
+	       return inventoryItems;
+	   }
+	   public InventoryItem getInventoryItemByIndex(int index){
+	       List<InventoryItem> inventoryItems = getInventory();
+	       if (index >= 0 && index < inventoryItems.size()){
+	           return inventoryItems.get(index);
+	       }
+	       return null;
+	   }
+}
+
+import java.util.List;
+import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import com.opencsv.CSVReader;
+public class CandyStoreApp {
+
+	public static void main(String[] args) {
+		//loadInventFromCSV("data.csv");
+		CandyStore store = CandyStore.getInstance(); //Singleton Inventory
+		System.out.println("DEBUG: catalog size = " + store.getCatalog().size());
+		System.out.println("DEBUG: inventory size = " + store.getInventory().size());
+        Catalog catalogView = new Catalog();   // View Catalog
+        ShoppingCart cart = new ShoppingCart(); // User's Cart
+        
+        List<Customer> customers = List.of(
+        new Customer("mary", "5432"),
+        new Customer("william", "1234"));
+        
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to the Candy Store!");
+        System.out.print("Username: ");
+        String username = scanner.nextLine();
+        System.out.print("Password: ");
+        String password = scanner.nextLine();
+        
+        Customer loginCustomer = null;
+        boolean login = false;
+        
+        for (Customer customer : customers) {
+        	if (customer.authenticate(username,  password)) {
+        		loginCustomer = customer;
+        		login = true;
+        		break;
+        	}
+        }
+        if (!login) {
+        	System.out.println("Invalid login");
+        	scanner.close();
+        	return;
+        }
+        System.out.println("Logged in as: " + loginCustomer.getUsername());
+        
+        
+        ConsoleUI  ui = new ConsoleUI(store, catalogView, cart);
+        ui.run();
+        
+        boolean running = true;
+        while (running){
+        	System.out.println("\nAvailable Candy: ");
+        	List<InventoryItem> inventoryItems = store.getInventory();
+        	for (int i=0; i<inventoryItems.size(); i++) {
+        		InventoryItem item = inventoryItems.get(i);
+        		Candy candy = item.getCandy();
+        		int qty = item.getQuantity();
+        		System.out.printf("%d. %s - $%.2f (Stock: %d)%n", i + 1, candy.getName(), candy.getPrice(), qty);
+        	}
+            //catalogView.showCatalog(store.getInventory());
+            System.out.print("\nEnter candy quantity to add to your cart (0 to checkout): ");
+            int choice = scanner.nextInt();
+            
+            if (choice == 0){
+                running = false;}
+                else{
+                    InventoryItem selectedItem = store.getInventoryItemByIndex(choice - 1);  
+                    if (selectedItem != null && selectedItem.getQuantity()>0){
+                        CandyFactory factory = getFactoryForCandy(selectedItem.getCandy());
+                        Candy candy = factory.createCandy();
+                        CandyPackage pack = factory.createPackage();
+                        
+                        cart.addItem(candy, pack);//add candy to cart
+                        
+                        Inventory.getInstance().removeCandy(selectedItem.getCandy().getName(), 1);
+                        System.out.println(selectedItem.getCandy().getName() + " was added to your cart.");
+                    }else{
+                            System.out.println("Invalid selection or out of stock");
+                    }
+            }
+        }
+        scanner.close();
+        
+        cart.viewCart();
+        PricingCommand pricing = new RegPricingCommand();
+        Checkout processor = new Checkout(pricing);
+        processor.checkout(cart.getItems());
+    }
+    public static CandyFactory getFactoryForCandy(Candy candy){
+        if (candy instanceof GummyCandy){
+            return new GummyCandyFactory();
+        }else if (candy instanceof ChocolateCandy){
+            return new ChocolateCandyFactory();
+        }else if (candy instanceof HardCandy){
+            return new HardCandyFactory();
+        }else {
+            throw new IllegalArgumentException("No factory found for this candy: " + candy.getClass().getSimpleName());
+        }
+
+	}
+    public static CandyFactory getFactoryForCandyType(String candyType) {
+    	switch (candyType.toLowerCase()) {
+    	case "gummy":
+    	case "gummy candy":
+    		return new GummyCandyFactory();
+    	case "chocolate":
+    	case "chocolate candy":
+    		return new ChocolateCandyFactory();
+    	case "hard":
+    	case "hard candy":
+    		return new HardCandyFactory();
+    	default:
+    		throw new IllegalArgumentException("No factory found for candy: " + candyType);
+    	}
+    }
+    public static void loadInventFromCSV(String filename) {
+    	try (InputStream input = CandyStoreApp.class.getClassLoader().getResourceAsStream(filename)){
+    		if (input == null) {
+    			System.out.println("File is not found in classpath: " + filename);
+    			return;
+    		}
+    		try (BufferedReader br = new BufferedReader(new InputStreamReader(input))){
+    			String line;
+    			Inventory inventory = Inventory.getInstance();
+    			int totalAdded = 0;
+    			br.readLine();
+    		
+    		while ((line = br.readLine()) != null){
+    			String[] parts = line.split(",");
+    			if (parts.length < 4) continue;
+    			
+    			String name = parts[0].trim();
+    			String type = parts[1].trim();
+    			double price;
+    			try {
+    				price = Double.parseDouble(parts[2].trim());
+    			} catch (NumberFormatException e) {
+    				System.out.println("Invalid price value: " + parts[2]);
+    				continue;
+    			}
+    			//double price = Double.parseDouble(parts[2].trim());
+    			int quantity = Integer.parseInt(parts[3].trim());
+    			
+    			CandyFactory factory = getFactoryForCandyType(type);
+    			for (int i = 0; i< quantity; i++) {
+    				Candy candy = factory.createCandy();
+    				candy.prepare();
+    				inventory.addCandy(name, 1);
+    				totalAdded++;
+    			}
+    		}
+    		System.out.println("Loaded inventory: " + totalAdded + "candies");
+    	  }
+    	} catch (Exception e) {
+    		System.out.println("Error loading inventory: " + e.getMessage());
+    		e.printStackTrace();
+    	}
+    }
+}
+
+
+
+// Author: Kelly Payne 10/5/25
+public class ChocolateCandy implements Candy {
+	private String name;
+	private double price;
+	
+	public ChocolateCandy(String name, double price) {
+		this.name = name;
+		this.price = price;
+	}
+	@Override
+    public String getName() {
+        return "Chocolate Candy";
+    }
+    @Override
+    public double getWeight(){
+        return 40.0;
+    }
+    @Override
+    public double getPrice(){ 
+        return 2.0;
+    }
+    @Override
+    public void prepare(){ 
+        System.out.println("Chocolate is melted and shaped into bars.");
+    }
+    @Override
+    public String toString(){
+        return getName() + " $" + getPrice() + ", " + getWeight() + "grams";
+    }
+}
+
+
+public class Customer {
+	private String username;
+	private String password;
+	
+	public Customer(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+	public boolean authenticate(String inputUser, String inputPass) {
+		return username.equals(inputUser) && password.equals(inputPass);
+				
+	}
+	public String getUsername() {
+		return username;
+	}
+
+}
+
+
+public class GummyCandy implements Candy{
+	private String name;
+	private double price;
+	
+	public GummyCandy(String name, double price) {
+		this.name = name;
+		this.price = price;
+	}
+	@Override
+    public String getName() {
+        return "Gummy Candy";
+    }
+    @Override
+    public double getWeight(){
+        return 25.0;
+    }
+    @Override
+    public double getPrice(){ 
+        return 1.75;
+    }
+    @Override
+    public void prepare(){
+        System.out.println("This is soft candy.");
+    }
+}
+
+//Author: Kelly Payne 10/5/25
+public class HardCandy implements Candy{
+	private String name;
+	private double price;
+	
+	public HardCandy(String name, double price) {
+		this.name = name;
+		this.price = price;
+	}
+	@Override
+    public String getName() {
+        return "Hard Candy";
+    }
+    public double getWeight(){
+        return 25.0;
+    }
+    public double getPrice(){ 
+        return 1.5;
+    }
+    @Override
+    public void prepare() {
+        System.out.println("This is hard candy.");
+    }
+}
+
+//Author: Kelly Payne
+// Shopping Cart and Data Holder
+import java.util.*;
+public class ShoppingCart {
+	private List<Candy> items = new ArrayList<>();
+	private List<CandyPackage> packages = new ArrayList<>();
+	   
+	   public void addItem(Candy candy, CandyPackage candyPackage){
+	       items.add(candy);
+	       packages.add(candyPackage);
+	       System.out.println(candy.getName() + " was added to cart.");
+	   }
+	   public void removeItem(Candy candy) {
+		   int index = items.indexOf(candy);
+		   if (index >= 0) {
+			   items.remove(index);
+			   packages.remove(index);
+		   }
+		}
+	   public void viewCart(){
+	       System.out.println("\nYour Cart: ");
+	       double total = 0;
+	       for (int i=0; i<items.size(); i++) {
+	    	   Candy candy = items.get(i);
+	    	   CandyPackage candyPackage = packages.get(i);
+	    	   double candyPrice = candy.getPrice();
+	    	   double packagePrice = (candyPackage != null)? candyPackage.getPrice() : 0;
+	    	   System.out.printf("* %s: $%.2f%s%n", candy.getName(), candyPrice, (candyPackage != null ? " + Packaging: $" + packagePrice: ""));
+	    	   total += candyPrice + packagePrice;
+	       }
+	       System.out.printf("Total: $%.2f%n" + total);
+	   }
+	   public List<Candy> getItems(){
+	       return items;
+	   }
+	   public List<CandyPackage> getPackages(){
+		   return packages;
+	   }
+}
+(data.csv file contents)
+"name,type,price,stock"
+"Candy Bar,chocolate,1.5,20"
+"Lollipop,hard candy,0.75,80"
+"Gummy Bears,gummy candy,1.5,30"
