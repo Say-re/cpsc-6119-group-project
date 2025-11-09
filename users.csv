@@ -1,0 +1,4 @@
+username,passwordHash,salt,role,email,recoveryQuestion,recoveryAnswerHash,answerSalt
+test,gCZ7+e5tiCP6036aXcYrEn+iCaHEbEjDXzeTQCduj58=,FWHdF44WBU4In5WItTeGqw==,customer,test@test.com,What city were you born in?,ZRUx4TPeLwxAfXw3rltpz7ttOBR0wro/9QtYWTbHhCo=,4kNFK5ujhp4LxCxwka1AFw==
+admin,GPWZF5jC6ybEbyDnCjgxmMqk6bnkZ2F5wFMq+G92tFY=,3Zv80ms0xxMsojVn582SFg==,admin,admin@sweetfactory.com,What is your favorite book?,NjF58ExYm6OdrAgmxrgEPaI8HTe9roGF8rjO+mKvq8Q=,bN/xX5FBnYZF19B7mdLyiw==
+customer,8sXqeel0+lG6Im/2I/cPM0hRZ0MO/rhTRx8aDx38w6E=,rMC+7PUBQfoG6exI7nytBg==,customer,customer@sweetfactory.com,What was your first pet's name?,ecocFOWBuiKgu5qyIoJAWEUiAKfCRlwzhp39I0DBrjs=,8Y3wL2R5NaeZBGb6vCoq/Q==
