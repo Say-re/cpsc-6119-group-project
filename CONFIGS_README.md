@@ -64,7 +64,13 @@ Runs the LoginPage JavaFX application:
 mvn javafx:run -Plogin-ui
 ```
 
-### 2. `main-app` Profile (Default)
+### 2. `demo-be` Profile
+Run the sample Demo BE file to validate functionality for back-end
+```bash
+mvn javafx:run -Pdemo-be
+```
+
+### 3. `main-app` Profile (Default)
 Runs the CandyStoreApp console application:
 ```bash
 mvn javafx:run
