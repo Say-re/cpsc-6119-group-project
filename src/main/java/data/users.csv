@@ -1,0 +1,3 @@
+username,passwordHash,salt,role,email,recoveryQuestion,recoveryAnswerHash,answerSalt
+admin,9Si6vcVW8+WN38WDVDi7pkNjD0Vw0nL/7wMANHwfSh0=,3kMGLKX0uoDunG0+8XK03g==,admin,admin@sweetfactory.com,What is your favorite book?,rF1ESnyKn2+BXzBg5VjVdMsUwhEDiyZlab7KgAcjn+k=,9EDY6pEE5objXdlu6cawcw==
+customer,zJRIo76xWnDH6f613+MLsLwjxohXFXaEygIzuRDzT10=,5pPfn3wDR08bN0WIKlsFVA==,customer,customer@sweetfactory.com,What was your first pet's name?,UR0I51lGfuzZLjHXJes16JlchIkYWGCCXCI3Q3o8V1g=,ZVjOqHtsw5TaC60Ifw9czw==
