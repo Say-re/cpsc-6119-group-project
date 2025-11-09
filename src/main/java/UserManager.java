@@ -11,7 +11,7 @@ import java.util.*;
  * Uses SHA-256 with salt for password hashing
  */
 public class UserManager {
-    private static final String CSV_FILE = "users.csv";
+    private static final String CSV_FILE = "src/main/java/data/users.csv";
     private static final String CSV_HEADER = "username,passwordHash,salt,role,email,recoveryQuestion,recoveryAnswerHash,answerSalt";
     private static UserManager instance;
 

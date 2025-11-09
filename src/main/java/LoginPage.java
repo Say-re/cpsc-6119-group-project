@@ -8,7 +8,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 /**
- * Modern Login Page for Candy Store Application
+ * Login Page for Candy Store Application
  * @description Follows mobile-first design principles with responsive layout
  * Integrates with UserManager for authentication
  */
