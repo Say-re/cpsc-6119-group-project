@@ -317,12 +317,15 @@ public class LoginPage extends Application {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Login Successful");
             alert.setHeaderText(null);
-            alert.setContentText(
-                "Welcome, " + username + "!\n\n" +
+            String welcomeMessage = "Welcome, " + username + "!\n\n" +
                 "Role: " + account.getRole() + "\n" +
                 "Email: " + account.getEmail() + "\n\n" +
-                "You would now be redirected to the main application."
-            );
+                "You would now be redirected to the main application.";
+            alert.setContentText(welcomeMessage);
+
+            // Style the alert
+            styleDialog(alert.getDialogPane(), "Login Successful", welcomeMessage);
+
             alert.showAndWait();
 
             // TODO: Transition to main application based on role
@@ -348,8 +351,10 @@ public class LoginPage extends Application {
         // Step 1: Ask for username
         TextInputDialog usernameDialog = new TextInputDialog();
         usernameDialog.setTitle("Password Recovery");
-        usernameDialog.setHeaderText("Reset Password - Step 1 of 3");
-        usernameDialog.setContentText("Enter your username:");
+        usernameDialog.setHeaderText(null);
+
+        // Style the dialog
+        styleDialog(usernameDialog.getDialogPane(), "Reset Password - Step 1 of 3", "Enter your username to begin password recovery");
 
         usernameDialog.showAndWait().ifPresent(username -> {
             UserAccount account = userManager.getUser(username);
@@ -358,7 +363,12 @@ public class LoginPage extends Application {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("User Not Found");
                 alert.setHeaderText(null);
-                alert.setContentText("No account found with username: " + username);
+                String errorMsg = "No account found with username: " + username;
+                alert.setContentText(errorMsg);
+
+                // Style the alert
+                styleDialog(alert.getDialogPane(), "User Not Found", errorMsg);
+
                 alert.showAndWait();
                 return;
             }
@@ -367,7 +377,12 @@ public class LoginPage extends Application {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("No Recovery Question");
                 alert.setHeaderText(null);
-                alert.setContentText("This account does not have a recovery question set up.\nPlease contact an administrator for assistance.");
+                String errorMsg = "This account does not have a recovery question set up.\nPlease contact an administrator for assistance.";
+                alert.setContentText(errorMsg);
+
+                // Style the alert
+                styleDialog(alert.getDialogPane(), "No Recovery Question", errorMsg);
+
                 alert.showAndWait();
                 return;
             }
@@ -375,8 +390,11 @@ public class LoginPage extends Application {
             // Step 2: Show recovery question and ask for answer
             TextInputDialog answerDialog = new TextInputDialog();
             answerDialog.setTitle("Password Recovery");
-            answerDialog.setHeaderText("Reset Password - Step 2 of 3");
-            answerDialog.setContentText("Security Question:\n" + account.getRecoveryQuestion() + "\n\nYour Answer:");
+            answerDialog.setHeaderText(null);
+
+            // Style the dialog
+            styleDialog(answerDialog.getDialogPane(), "Reset Password - Step 2 of 3",
+                       "Security Question:\n" + account.getRecoveryQuestion() + "\n\nPlease provide your answer:");
 
             answerDialog.showAndWait().ifPresent(answer -> {
                 // Validate answer
@@ -384,7 +402,7 @@ public class LoginPage extends Application {
                     // Step 3: Ask for new password
                     Dialog<String> passwordDialog = new Dialog<>();
                     passwordDialog.setTitle("Password Recovery");
-                    passwordDialog.setHeaderText("Reset Password - Step 3 of 3");
+                    passwordDialog.setHeaderText(null);
 
                     ButtonType resetButtonType = new ButtonType("Reset Password", ButtonBar.ButtonData.OK_DONE);
                     passwordDialog.getDialogPane().getButtonTypes().addAll(resetButtonType, ButtonType.CANCEL);
@@ -393,16 +411,16 @@ public class LoginPage extends Application {
                     passwordBox.setPadding(new Insets(20, 30, 20, 30));
 
                     Label newPasswordLabel = new Label("New Password");
-                    newPasswordLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+                    newPasswordLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
                     PasswordField newPasswordField = new PasswordField();
                     newPasswordField.setPromptText("Enter new password (min 6 characters)");
-                    newPasswordField.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-padding: 12px;");
+                    newPasswordField.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px; -fx-font-size: 15px;");
 
                     Label confirmPasswordLabel = new Label("Confirm Password");
-                    confirmPasswordLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+                    confirmPasswordLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
                     PasswordField confirmPasswordField = new PasswordField();
                     confirmPasswordField.setPromptText("Confirm new password");
-                    confirmPasswordField.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-padding: 12px;");
+                    confirmPasswordField.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px; -fx-font-size: 15px;");
 
                     passwordBox.getChildren().addAll(
                         newPasswordLabel, newPasswordField,
@@ -410,6 +428,9 @@ public class LoginPage extends Application {
                     );
 
                     passwordDialog.getDialogPane().setContent(passwordBox);
+
+                    // Style the dialog
+                    styleDialog(passwordDialog.getDialogPane(), "Reset Password - Step 3 of 3", "Enter your new password");
 
                     passwordDialog.setResultConverter(dialogButton -> {
                         if (dialogButton == resetButtonType) {
@@ -435,11 +456,14 @@ public class LoginPage extends Application {
                             if (userManager.updatePassword(username, newPassword)) {
                                 Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
                                 successAlert.setTitle("Success");
-                                successAlert.setHeaderText("Password Reset Successfully!");
-                                successAlert.setContentText(
-                                    "Your password has been updated.\n\n" +
-                                    "You can now log in with your new password."
-                                );
+                                successAlert.setHeaderText(null);
+                                String successMsg = "Your password has been updated.\n\n" +
+                                    "You can now log in with your new password.";
+                                successAlert.setContentText(successMsg);
+
+                                // Style the alert
+                                styleDialog(successAlert.getDialogPane(), "Password Reset Successfully!", successMsg);
+
                                 successAlert.showAndWait();
                             } else {
                                 showValidationError("Failed to update password. Please try again.");
@@ -454,7 +478,12 @@ public class LoginPage extends Application {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Incorrect Answer");
                     alert.setHeaderText(null);
-                    alert.setContentText("The answer you provided is incorrect.\nPlease try again or contact an administrator.");
+                    String errorMsg = "The answer you provided is incorrect.\nPlease try again or contact an administrator.";
+                    alert.setContentText(errorMsg);
+
+                    // Style the alert
+                    styleDialog(alert.getDialogPane(), "Incorrect Answer", errorMsg);
+
                     alert.showAndWait();
                 }
             });
@@ -470,7 +499,7 @@ public class LoginPage extends Application {
         // Create signup dialog
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Join Sweet Factory");
-        dialog.setHeaderText("Create your account to get started");
+        dialog.setHeaderText(null);
 
         // Set button types
         ButtonType createButtonType = new ButtonType("Create Account", ButtonBar.ButtonData.OK_DONE);
@@ -483,52 +512,52 @@ public class LoginPage extends Application {
 
         // Username field
         Label usernameLabel = new Label("Username");
-        usernameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        usernameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
         TextField newUsername = new TextField();
         newUsername.setPromptText("Choose a username");
-        newUsername.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px;");
+        newUsername.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px; -fx-font-size: 15px;");
         VBox usernameBox = new VBox(8, usernameLabel, newUsername);
 
         // Password field
         Label passwordLabel = new Label("Password");
-        passwordLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        passwordLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
         PasswordField newPassword = new PasswordField();
         newPassword.setPromptText("Create a password (min 6 characters)");
-        newPassword.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px;");
+        newPassword.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px; -fx-font-size: 15px;");
         VBox passwordBox = new VBox(8, passwordLabel, newPassword);
 
         // Confirm Password field
         Label confirmLabel = new Label("Confirm Password");
-        confirmLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        confirmLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
         PasswordField confirmPassword = new PasswordField();
         confirmPassword.setPromptText("Confirm your password");
-        confirmPassword.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px;");
+        confirmPassword.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px; -fx-font-size: 15px;");
         VBox confirmBox = new VBox(8, confirmLabel, confirmPassword);
 
         // Email field (kept for account management)
         Label emailLabel = new Label("Email");
-        emailLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        emailLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
         TextField email = new TextField();
         email.setPromptText("your.email@example.com");
-        email.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px;");
+        email.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px; -fx-font-size: 15px;");
         VBox emailBox = new VBox(8, emailLabel, email);
 
         // Recovery Question dropdown
         Label questionLabel = new Label("Recovery Question");
-        questionLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        questionLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
         ComboBox<String> questionCombo = new ComboBox<>();
         questionCombo.getItems().addAll(RECOVERY_QUESTIONS);
         questionCombo.setPromptText("Select a security question");
         questionCombo.setMaxWidth(Double.MAX_VALUE);
-        questionCombo.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-padding: 8px;");
+        questionCombo.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 8px; -fx-font-size: 15px;");
         VBox questionBox = new VBox(8, questionLabel, questionCombo);
 
         // Recovery Answer field
         Label answerLabel = new Label("Answer");
-        answerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        answerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #252525;");
         TextField recoveryAnswer = new TextField();
         recoveryAnswer.setPromptText("Your answer");
-        recoveryAnswer.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px;");
+        recoveryAnswer.setStyle("-fx-background-color: #f3f3f5; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px; -fx-font-size: 15px;");
         VBox answerBox = new VBox(8, answerLabel, recoveryAnswer);
 
         formBox.getChildren().addAll(usernameBox, passwordBox, confirmBox, emailBox, questionBox, answerBox);
@@ -536,7 +565,11 @@ public class LoginPage extends Application {
         ScrollPane scrollPane = new ScrollPane(formBox);
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefHeight(500);
+        scrollPane.setStyle("-fx-background: #ffffff; -fx-border-color: transparent;");
         dialog.getDialogPane().setContent(scrollPane);
+
+        // Style the dialog
+        styleDialog(dialog.getDialogPane(), "Create Your Account", "Join Sweet Factory and start shopping!");
 
         // Handle create button
         dialog.setResultConverter(dialogButton -> {
@@ -598,13 +631,16 @@ public class LoginPage extends Application {
                 if (userManager.createUser(username, password, "customer", emailText, question, answer)) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Success");
-                    alert.setHeaderText("Account Created!");
-                    alert.setContentText(
-                        "Your account has been created successfully!\n\n" +
+                    alert.setHeaderText(null);
+                    String successMsg = "Your account has been created successfully!\n\n" +
                         "Username: " + username + "\n" +
                         "Email: " + emailText + "\n\n" +
-                        "You can now log in."
-                    );
+                        "You can now log in.";
+                    alert.setContentText(successMsg);
+
+                    // Style the alert
+                    styleDialog(alert.getDialogPane(), "Account Created!", successMsg);
+
                     alert.showAndWait();
                 } else {
                     showValidationError("Username already exists!");
@@ -617,12 +653,164 @@ public class LoginPage extends Application {
     }
 
     /**
+     * Style a dialog to match the login page design
+     * TODO: Move styles into css file instead of being hard coded
+     */
+    private void styleDialog(DialogPane dialogPane, String title, String description) {
+        // Style the dialog pane background
+        dialogPane.setStyle(
+            "-fx-background-color: #ffffff; " +
+            "-fx-border-color: rgba(0, 0, 0, 0.1); " +
+            "-fx-border-width: 1px; " +
+            "-fx-border-radius: 14px; " +
+            "-fx-background-radius: 14px; " +
+            "-fx-padding: 20px;"
+        );
+
+        // Create custom header
+        VBox header = new VBox(8);
+        header.setPadding(new Insets(0, 0, 16, 0));
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle(
+            "-fx-font-size: 20px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: #2C3E50;"
+        );
+
+        Label descLabel = new Label(description);
+        descLabel.setStyle(
+            "-fx-font-size: 14px; " +
+            "-fx-text-fill: #7F8C8D; " +
+            "-fx-wrap-text: true;"
+        );
+        descLabel.setMaxWidth(400);
+        descLabel.setWrapText(true);
+
+        header.getChildren().addAll(titleLabel, descLabel);
+
+        // Insert header at the top of the content
+        if (dialogPane.getContent() != null) {
+            VBox wrapper = new VBox(16);
+            wrapper.getChildren().addAll(header, dialogPane.getContent());
+            dialogPane.setContent(wrapper);
+        } else {
+            dialogPane.setContent(header);
+        }
+
+        // Style buttons
+        dialogPane.lookupButton(ButtonType.OK);
+        dialogPane.lookupButton(ButtonType.CANCEL);
+
+        // Apply button styling after dialog is shown
+        javafx.application.Platform.runLater(() -> {
+            dialogPane.lookupAll(".button").forEach(node -> {
+                if (node instanceof Button) {
+                    Button btn = (Button) node;
+                    String buttonText = btn.getText();
+
+                    if (buttonText != null && (buttonText.equals("OK") ||
+                        buttonText.equals("Create Account") ||
+                        buttonText.equals("Reset Password"))) {
+                        // Primary button style (pink)
+                        btn.setMinWidth(100);
+                        btn.setStyle(
+                            "-fx-background-color: #ff6b9d; " +
+                            "-fx-text-fill: #ffffff; " +
+                            "-fx-font-size: 15px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-padding: 12px 24px; " +
+                            "-fx-background-radius: 10px; " +
+                            "-fx-border-radius: 10px; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-cursor: hand;"
+                        );
+
+                        btn.setOnMouseEntered(e -> btn.setStyle(
+                            "-fx-background-color: #E5527D; " +
+                            "-fx-text-fill: #ffffff; " +
+                            "-fx-font-size: 15px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-padding: 12px 24px; " +
+                            "-fx-background-radius: 10px; " +
+                            "-fx-border-radius: 10px; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-cursor: hand;"
+                        ));
+
+                        btn.setOnMouseExited(e -> btn.setStyle(
+                            "-fx-background-color: #ff6b9d; " +
+                            "-fx-text-fill: #ffffff; " +
+                            "-fx-font-size: 15px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-padding: 12px 24px; " +
+                            "-fx-background-radius: 10px; " +
+                            "-fx-border-radius: 10px; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-cursor: hand;"
+                        ));
+                    } else if (buttonText != null && buttonText.equals("Cancel")) {
+                        // Secondary button style (outlined)
+                        btn.setMinWidth(100);
+                        btn.setStyle(
+                            "-fx-background-color: #ffffff; " +
+                            "-fx-text-fill: #ff6b9d; " +
+                            "-fx-font-size: 15px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-padding: 12px 24px; " +
+                            "-fx-border-color: #ff6b9d; " +
+                            "-fx-border-width: 2px; " +
+                            "-fx-background-radius: 10px; " +
+                            "-fx-border-radius: 10px; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-cursor: hand;"
+                        );
+
+                        btn.setOnMouseEntered(e -> btn.setStyle(
+                            "-fx-background-color: #FFF0F5; " +
+                            "-fx-text-fill: #ff6b9d; " +
+                            "-fx-font-size: 15px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-padding: 12px 24px; " +
+                            "-fx-border-color: #ff6b9d; " +
+                            "-fx-border-width: 2px; " +
+                            "-fx-background-radius: 10px; " +
+                            "-fx-border-radius: 10px; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-cursor: hand;"
+                        ));
+
+                        btn.setOnMouseExited(e -> btn.setStyle(
+                            "-fx-background-color: #ffffff; " +
+                            "-fx-text-fill: #ff6b9d; " +
+                            "-fx-font-size: 15px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-padding: 12px 24px; " +
+                            "-fx-border-color: #ff6b9d; " +
+                            "-fx-border-width: 2px; " +
+                            "-fx-background-radius: 10px; " +
+                            "-fx-border-radius: 10px; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-cursor: hand;"
+                        ));
+                    }
+                }
+            });
+        });
+    }
+
+    /**
      * Show validation error alert
      */
     private void showValidationError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Validation Error");
+        alert.setHeaderText(null);
         alert.setContentText(message);
+
+        // Style the alert
+        styleDialog(alert.getDialogPane(), "Validation Error", message);
+
         alert.showAndWait();
     }
 
