@@ -186,6 +186,23 @@
             </build>
         </profile>
 
+        <!-- Profile for running Demo BE Abdulraheem -->
+        <profile>
+            <id>demo-be</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <version>${maven.javafx.plugin.version}</version>
+                        <configuration>
+                            <mainClass>app.Demo</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <!-- Profile for running main CandyStoreApp -->
         <profile>
             <id>main-app</id>
