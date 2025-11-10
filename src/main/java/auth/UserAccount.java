@@ -1,3 +1,5 @@
+package auth;
+
 /**
  * UserAccount Model
  * Represents a user account in the Candy Store system

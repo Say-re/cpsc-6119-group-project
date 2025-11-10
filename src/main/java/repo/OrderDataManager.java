@@ -5,7 +5,10 @@ import util.CsvUtil;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OrderDataManager {
     private static final String ORDERS = "orders.csv";
@@ -75,5 +78,51 @@ public class OrderDataManager {
                 o.addItem(new OrderItem(r[2], name, qty, price));
             }
         }
+    }
+
+    /**
+     * Get all orders from CSV
+     */
+    public List<Order> getAllOrders() {
+        List<Order> orders = new ArrayList<>();
+        try {
+            for (String[] r : CsvUtil.read(ORDERS)) {
+                if (r.length >= 7) {
+                    Order o = new Order(r[0], r[1], Instant.parse(r[2]));
+                    o.setStatus(OrderStatus.valueOf(r[3]));
+                    loadItemsInto(o);
+                    orders.add(o);
+                }
+            }
+        } catch (IOException ignored) {}
+        return orders;
+    }
+
+    /**
+     * Get orders by status
+     */
+    public List<Order> getOrdersByStatus(OrderStatus status) {
+        return getAllOrders().stream()
+            .filter(o -> o.getStatus() == status)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get orders created after a specific date
+     */
+    public List<Order> getOrdersAfter(Instant after) {
+        return getAllOrders().stream()
+            .filter(o -> o.getCreatedAt().isAfter(after))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get today's orders
+     */
+    public List<Order> getTodaysOrders() {
+        Instant startOfToday = LocalDate.now()
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant();
+        return getOrdersAfter(startOfToday);
     }
 }
