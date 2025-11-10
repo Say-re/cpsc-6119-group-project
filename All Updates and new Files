@@ -1,0 +1,1212 @@
+
+public class AddItemCommand implements CartCommand{
+	private ShoppingCart cart;
+	private Candy item;
+	
+	public AddItemCommand(ShoppingCart cart, Candy item) {
+		this.cart = cart;
+		this.item = item;
+	}
+	@Override
+	public void execute() {
+		cart.addItem(item);
+		System.out.println(item.getName() + " added to cart.");
+	}
+}
+
+
+public class BaseCandy implements Candy {
+	private String name;
+	private double price;
+	private double weight;
+	private int quantity;
+	
+	public BaseCandy(String name, double price, double weight, int quantity) {
+		this.name = name;
+		this.price = price;
+		this.weight = weight;
+		this.quantity = quantity;
+	}
+	@Override
+	public String getName() {
+		return name;
+	}
+	@Override
+	public double getWeight() {
+		return weight;
+	}
+	@Override
+	public void setPrice(double price) {
+		this.price = price;
+	}
+	@Override 
+	public double getPrice() {
+		return price;
+	}
+	@Override
+	public int getQuantity() {
+		return quantity;
+	}
+	@Override
+	public void prepare() {
+		System.out.println("Preparing " + name + "candies.");
+	}
+	 @Override
+	    public String toString(){
+	        return getName() + " $" + getPrice() + ", " + getWeight() + "grams";
+	    }
+}
+
+
+public class BaseCandyFactory implements CandyFactory{
+	@Override
+	public Candy createCandy() {
+		return new BaseCandy("Generic Candy", 1.20, .05, 12);
+	}
+	@Override
+	public Candy createCandy(double price) {
+		return new BaseCandy("Generic Candy", price, .05, 12);
+	}
+	@Override
+	public CandyPackage createPackage() {
+		return new BasicCandyPackage();
+	}
+	@Override
+	public Candy createCandy(Candy original) {
+		return new BaseCandy(
+				original.getName(), 
+				original.getPrice(), 
+				original.getWeight(),
+				original.getQuantity()
+    	);
+	}
+}
+
+
+public class BasicCandyPackage implements CandyPackage{
+	private double price = .10;
+	@Override
+	public void pack(Candy candy) {
+		System.out.println("Packing " + candy.getName() + " in a cleaar wrapper.");
+	}
+	@Override
+	public double getPrice() {
+		return price;
+	}
+
+}
+
+//Uses polymorphism --allows for different types of candy to be handled
+// Author: Kelly Payne 10/5/25
+public interface Candy {
+	String getName();
+    double getWeight();
+    double getPrice();
+    int getQuantity();
+    void prepare();
+    void setPrice(double price); //added setter
+}
+
+//Author: Kelly Payne 10/5/25
+// Abstract Factory Interface - declares methods
+// to create families of related objects
+public interface CandyFactory {
+	Candy createCandy();
+	Candy createCandy(double price);//candy price from CSV
+    CandyPackage createPackage();
+    
+    Candy createCandy(Candy original);
+}
+
+
+public interface CandyPackage {
+	void pack(Candy candy);
+    double getPrice();
+}
+
+
+public class CandyProduction {
+	public static void main(String[] args){
+	       CandyFactory factory = new GummyCandyFactory();
+	       Candy candy = factory.createCandy();
+	       candy.prepare();
+	       
+	       CandyPackage pack = factory.createPackage();
+	       pack.pack(candy);
+	       
+	       Inventory inventory = Inventory.getInstance();
+	       inventory.addCandy(candy.getName(), 1);
+	       // show current inventory
+	       inventory.displayInventory();
+	   }
+}
+
+import java.util.ArrayList;
+import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.FileReader;
+import java.util.List;
+import com.opencsv.CSVReader;
+
+public class CandyStore {
+	private static CandyStore instance= null;
+	private List<Candy> catalog = new ArrayList<>();
+	private Inventory inventory = Inventory.getInstance();
+	   
+	   private CandyStore(){
+		   loadInventFromCSV("data.csv");
+	       
+	   }
+	   public void loadInventFromCSV(String filepath) {
+		   try (InputStream input = CandyStore.class.getResourceAsStream("/data.csv")){
+			   if (input == null) {
+				   System.err.println("File not found in classpath: /data.csv");
+				   loadDefaultCatalogAndInvent();
+				   return;
+			   }
+		   
+		   try (CSVReader reader = new CSVReader(new InputStreamReader(input))){
+		   	   String[] line;
+			   reader.readNext();
+			   while ((line = reader.readNext()) != null) {
+				   if (line.length < 4) {
+					   continue; }
+				   
+				   String name = line[0].trim();
+				   String type = line[1].trim();
+				   double price = Double.parseDouble(line[2].trim());
+				   int stock = Integer.parseInt(line[3].trim());
+				   
+				   double weight;
+				   String lowerType = type.toLowerCase();
+				   if (lowerType.contains("gummy")) {
+					   weight = 0.05;
+				   } else if (lowerType.contains("chocolate")) {
+					   weight = .15;
+				   } else if (lowerType.contains("hard")) {
+					   weight = .10;
+				   } else {
+					   weight = .05; //default weight
+				   }
+				   Candy candy = createCandy(name, price, weight, stock);
+				   catalog.add(candy);
+				   inventory.addCandy(candy.getName(), stock);
+				}
+			  }
+		   }catch (Exception e) {
+			   System.err.println("Error loading data from CSV: " + e.getMessage());
+			   e.printStackTrace();
+			   loadDefaultCatalogAndInvent();
+		  }
+		   System.out.println("Load inventory: " + catalog.size() + " candies");
+		}
+	   
+	   private Candy createCandy(String name, double price, double weight, int quantity) {
+		   String lowerName = name.toLowerCase();
+		   if (lowerName.contains("gummy")) {
+			   return new GummyCandy(name, price, weight, quantity);
+		   }else if (lowerName.contains("chocolate")) {
+			   return new ChocolateCandy(name, price, weight, quantity);
+		   }else if (lowerName.contains("hard")) {
+			   return new HardCandy(name, price, weight, quantity);
+		   }else {
+			   return new BaseCandy(name, price, weight, quantity);
+		   }
+	   }
+	   private void loadDefaultCatalogAndInvent() {
+		   Candy gummy = new GummyCandy("Gummy Bear", 1.00, .05, 20);
+		   Candy chocolate = new ChocolateCandy("Chocolate Bar", 1.50, .05, 25);
+		   Candy hard = new HardCandy("Lollipop", .75,.05, 20);
+		   catalog.add(gummy);
+		   catalog.add(chocolate);
+		   catalog.add(hard);
+		   inventory.addCandy(gummy.getName(), 15);
+		   inventory.addCandy(chocolate.getName(), 20);
+		   inventory.addCandy(hard.getName(), 10);
+	   }
+	   public static CandyStore getInstance(){
+	       if (instance == null){
+	           instance = new CandyStore();
+	       }
+	       return instance;
+	   }
+	   public List<Candy> getCatalog(){
+	       return catalog;
+	   }
+	   public List<InventoryItem> getInventory(){
+	       List<InventoryItem> inventoryItems = new ArrayList<>();
+	       for (Candy candy : catalog){
+	           int qty = inventory.getStock(candy.getName());
+	           inventoryItems.add(new InventoryItem(candy, qty));
+	       }
+	       return inventoryItems;
+	   }
+	   public InventoryItem getInventoryItemByIndex(int index){
+	       List<InventoryItem> inventoryItems = getInventory();
+	       if (index >= 0 && index < inventoryItems.size()){
+	           return inventoryItems.get(index);
+	       }
+	       return null;
+	   }
+}
+
+import java.util.List;
+import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+public class CandyStoreApp {
+
+	public static void main(String[] args) {
+		loadInventFromCSV("data.csv");
+		CandyStore store = CandyStore.getInstance(); //Singleton Inventory
+		        
+		Catalog catalogView = new Catalog();   // View Catalog
+        ShoppingCart cart = new ShoppingCart(); // User's Cart
+        
+        List<Customer> customers = List.of(
+        new Customer("mary", "5432"),
+        new Customer("william", "1234"));
+        
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to the Candy Store!");
+        System.out.print("Username: ");
+        String username = scanner.nextLine();
+        System.out.print("Password: ");
+        String password = scanner.nextLine();
+        
+        Customer loginCustomer = null;
+        boolean login = false;
+        
+        for (Customer customer : customers) {
+        	if (customer.authenticate(username,  password)) {
+        		loginCustomer = customer;
+        		login = true;
+        		break;
+        	}
+        }
+        if (!login) {
+        	System.out.println("Invalid login");
+        	scanner.close();
+        	return;
+        }
+        System.out.println("Logged in as: " + loginCustomer.getUsername());
+        
+        
+       // ConsoleUI  ui = new ConsoleUI(store, catalogView, cart);
+       // ui.run();
+        
+        boolean running = true;
+        while (running){
+        	System.out.println("\nAvailable Candy: ");
+        	List<InventoryItem> inventoryItems = store.getInventory();
+        	for (int i=0; i<inventoryItems.size(); i++) {
+        		InventoryItem item = inventoryItems.get(i);
+        		Candy candy = item.getCandy();
+        		int qty = item.getQuantity();
+        		System.out.printf("%d. %s - $%.2f (Stock: %d)%n", i + 1, candy.getName(), candy.getPrice(), qty);
+        	}
+            
+            System.out.print("\nEnter candy quantity to add to your cart (0 to checkout): ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            
+            if (choice == 0){
+                running = false;
+                break;}
+                else{
+                    InventoryItem selectedItem = store.getInventoryItemByIndex(choice - 1);  
+                    if (selectedItem != null && selectedItem.getQuantity()>0){
+                        CandyFactory factory = getFactoryForCandy(selectedItem.getCandy());
+                        Candy candy = factory.createCandy(selectedItem.getCandy());// pass real candy
+                        candy.setPrice(selectedItem.getCandy().getPrice());
+                        
+                        System.out.print("Would you like this candy packaged? (yes/no): ");
+                        String packChoice = scanner.nextLine().trim().toLowerCase();
+                        
+                        CandyPackage pack = null;
+                        if (packChoice.equals("yes")|| packChoice.equals("y")) {
+                        	pack = factory.createPackage();
+                        	pack.pack(candy);
+                        }
+                      //  CandyPackage pack = factory.createPackage();
+                        
+                        cart.addItem(candy, pack);//add candy to cart
+                        
+                        Inventory.getInstance().removeCandy(selectedItem.getCandy().getName(), 1);
+                        System.out.println(selectedItem.getCandy().getName() + " was added to your cart.");
+                    }else{
+                            System.out.println("Invalid selection or out of stock");
+                    }
+            }
+        }
+        scanner.close();
+        
+        cart.viewCart();
+        PricingCommand pricing = new RegPricingCommand();
+        Checkout processor = new Checkout(pricing);
+        processor.checkout(cart.getItems());
+        return;
+    }
+    public static CandyFactory getFactoryForCandy(Candy candy){
+        if (candy instanceof GummyCandy){
+            return new GummyCandyFactory();
+        }else if (candy instanceof ChocolateCandy){
+            return new ChocolateCandyFactory();
+        }else if (candy instanceof HardCandy){
+            return new HardCandyFactory();
+        }else  if(candy instanceof BaseCandy){
+        	return new BaseCandyFactory();
+        } else {
+            throw new IllegalArgumentException("No factory found for this candy: " + candy.getClass().getSimpleName());
+        }
+
+	}
+    public static CandyFactory getFactoryForCandyType(String candyType) {
+    	switch (candyType.toLowerCase()) {
+    	case "gummy":
+    	case "gummy candy":
+    		return new GummyCandyFactory();
+    	case "chocolate":
+    	case "chocolate candy":
+    		return new ChocolateCandyFactory();
+    	case "hard":
+    	case "hard candy":
+    		return new HardCandyFactory();
+    	default:
+    		throw new IllegalArgumentException("No factory found for candy: " + candyType);
+    	}
+    }
+    public static void loadInventFromCSV(String filename) {
+        try (InputStream input = CandyStoreApp.class.getClassLoader().getResourceAsStream(filename)) {
+            if (input == null) {
+                System.out.println("File is not found in classpath: " + filename);
+                return;
+            }
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+                String line;
+                Inventory inventory = Inventory.getInstance();
+                int totalAdded = 0;
+                br.readLine();
+
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length < 4) continue;
+
+                    String name = parts[0].trim();
+                    String type = parts[1].trim();
+
+                    double price;
+                    try {
+                        price = Double.parseDouble(parts[2].trim());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid price value: " + parts[2]);
+                        continue;
+                    }
+                    int quantity = Integer.parseInt(parts[3].trim());
+
+                    CandyFactory factory = getFactoryForCandyType(type);
+                    Candy candy = factory.createCandy();
+                    candy.prepare();
+                    for (int i = 0; i < quantity; i++) {
+                        inventory.addCandy(name, 1);
+                        totalAdded++;
+                    }
+                }
+                System.out.println("Loaded inventory: " + totalAdded + "candies");
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading inventory: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
+public interface CartCommand {
+void execute();
+}
+
+import java.util.List;
+public class Catalog {
+	public void showCatalog(List<InventoryItem> inventory){
+        System.out.println(" Available Candy:\n");
+        int index = 1;
+        for (InventoryItem item : inventory){
+            Candy candy = item.getCandy();
+            System.out.printf("%d. %-20s $%.2f (%s grams)- Qty: %d%n", index++, candy.getName(), candy.getPrice(), candy.getWeight(), item.getQuantity());
+        }
+    }
+}
+
+import java.util.List;
+public class Checkout {
+	
+    private PricingCommand pricingCommand;
+    
+    public Checkout(PricingCommand pricingcommand){
+        this.pricingCommand = pricingcommand;
+    }
+    public void checkout(List<Candy> cartItems){
+        double finalPrice = pricingCommand.apply(cartItems);
+        //System.out.println("Total: $" + finalPrice);
+    }
+}
+
+
+public class ChocolateBox implements CandyPackage{
+	private double price = 3.00;
+    @Override
+    public void pack(Candy candy){
+        System.out.println("Packing " + candy.getName() + " in a decorative box.");
+    }
+    public double getPrice(){
+        return price;
+    }
+}
+
+// Author: Kelly Payne 10/5/25
+public class ChocolateCandy implements Candy {
+	private String name;
+	private double price;
+	private int quantity;
+	private double weight;
+	
+	public ChocolateCandy(String name, double price, double weight, int quantity) {
+		this.name = name;
+		this.price = price;
+		this.quantity = quantity;
+		this.weight = weight;
+	}
+	@Override
+    public String getName() {
+        return name;
+    }
+    @Override
+    public double getWeight(){
+        return weight;
+    }
+    @Override
+    public double getPrice(){ 
+        return price;
+    }
+    @Override
+    public void setPrice(double price) {
+    	this.price = price;
+    }
+    @Override
+    public void prepare(){ 
+        System.out.println("Chocolate is melted and shaped into bars.");
+    }
+    @Override
+    public int getQuantity() {
+    	return quantity;
+    }
+    @Override
+    public String toString(){
+        return getName() + " $" + getPrice() + ", " + getWeight() + "grams";
+    }
+}
+
+
+public class ChocolateCandyFactory implements CandyFactory{
+	@Override
+    public Candy createCandy(){
+        return new ChocolateCandy("chocolate", 1.50, .05, 25);            
+    }
+	public Candy createCandy(double price) {
+		return new ChocolateCandy("chocolate", price, .05, 25);
+	}
+    @Override
+    public CandyPackage createPackage(){
+        return new ChocolateBox();
+    }
+    @Override
+    public Candy createCandy(Candy original) {
+        return new HardCandy(
+            original.getName(),
+            original.getPrice(),
+            original.getWeight(),  
+            original.getQuantity()
+        );
+    }
+}
+
+import java.util.Scanner;
+
+public class ConsoleUI {
+	private CandyStore store;
+	private Catalog catalogView;
+	private ShoppingCart cart;
+	private Scanner scanner;
+
+	public ConsoleUI(CandyStore store, Catalog catalogView, ShoppingCart cart) {
+		this.store = store;
+		this.catalogView = catalogView;
+		this.cart = cart;
+		this.scanner = new Scanner(System.in);
+	}
+	public void run() {
+		boolean running = true;
+		while (running) {
+			catalogView.showCatalog(store.getInventory());
+			System.out.print("\nEnter candy quantity to add to your cart (0 to checkout): ");
+			int choice = scanner.nextInt();
+		
+			if (choice ==0) {
+				running = false;}
+			else {
+				handleAddToCart(choice);
+			}
+	}
+		cart.viewCart();
+		PricingCommand pricing = new RegPricingCommand();
+		Checkout processor = new Checkout(pricing);
+		processor.checkout(cart.getItems());
+	}
+	private void handleAddToCart(int choice) {
+		InventoryItem selectedItem = store.getInventoryItemByIndex(choice -1);
+		if (selectedItem !=null && selectedItem.getQuantity()>0) {
+			CandyFactory factory = getFactoryForCandy(selectedItem.getCandy());
+			Candy candy = factory.createCandy();
+			CandyPackage candyPackage = factory.createPackage();
+		
+			cart.addItem(candy, candyPackage);
+			Inventory.getInstance().removeCandy(selectedItem.getCandy().getName(), 1);
+			System.out.println(selectedItem.getCandy().getName() + " was added to your cart.");
+		}else {
+			System.out.println("Invalid selection or this item is out of stock.");
+		}
+	}
+
+	private CandyFactory getFactoryForCandy(Candy candy) {
+		if (candy instanceof GummyCandy) {
+			return new GummyCandyFactory();
+		} else if (candy instanceof ChocolateCandy) {
+			return new ChocolateCandyFactory();
+		} else if (candy instanceof HardCandy){
+			return new HardCandyFactory();
+		} else if (candy instanceof BaseCandy){
+			return new BaseCandyFactory();
+		} else {
+			throw new IllegalArgumentException("No factory found for this candy: " + candy.getClass().getSimpleName());
+		}
+	}	
+}
+
+public class Customer {
+	private String username;
+	private String password;
+	
+	public Customer(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+	public boolean authenticate(String inputUser, String inputPass) {
+		return username.equals(inputUser) && password.equals(inputPass);
+				
+	}
+	public String getUsername() {
+		return username;
+	}
+
+}
+
+
+	import java.util.List;
+
+	public class DiscountPricingCommand implements PricingCommand {
+	    private final double percentOff;
+
+	    public DiscountPricingCommand(double percentOff) {
+	        this.percentOff = percentOff;
+	    }
+
+	    @Override
+	    public double apply(List<Candy> items) {
+	        double total = items.stream().mapToDouble(Candy::getPrice).sum();
+	        return total * (1.0 - percentOff);
+	    }
+	}
+
+
+
+
+public class GummyBag implements CandyPackage {
+	private double price = 2.00;
+    @Override
+    public void pack(Candy candy){
+        System.out.println("Packing " + candy.getName() + " in clear plastic bag.");
+    }
+    @Override
+    public double getPrice(){
+        return price;
+    }
+}
+
+
+public class GummyCandy implements Candy{
+	private String name;
+	private double price;
+	private int quantity;
+	private double weight;
+	
+	
+	public GummyCandy(String name, double price, double weight, int quantity) {
+		this.name = name;
+		this.price = price;
+		this.quantity = quantity;
+		this.weight = weight;
+	}
+	@Override
+    public String getName() {
+        return name;
+    }
+    @Override
+    public double getWeight(){
+        return weight;
+    }
+    @Override
+    public double getPrice(){ 
+        return price;
+    }
+    @Override
+    public void prepare(){
+        System.out.println("This is soft candy.");
+    }
+    @Override
+    public int getQuantity() {
+    	return quantity;
+    }
+    @Override
+    public void setPrice(double price) {
+    	this.price = price; 
+    }
+    @Override
+    public String toString(){
+        return getName() + " $" + getPrice() + ", " + getWeight() + "grams";
+    }
+    
+}
+
+
+public class GummyCandyFactory implements CandyFactory {
+	@Override
+    public Candy createCandy(){
+        return new GummyCandy ("Gummy", 1.50, .05, 1);
+    }
+	@Override
+	public Candy createCandy(double price) {
+		return new GummyCandy("Gummy", price, .05, 25);
+	}
+    @Override
+    public CandyPackage createPackage(){
+        return new GummyBag();
+    }
+    @Override
+    public Candy createCandy(Candy original) {
+        return new GummyCandy(
+            original.getName(),
+            original.getPrice(),
+            original.getWeight(),  
+            original.getQuantity()
+        );
+    }
+}
+
+
+//Author: Kelly Payne 10/5/25
+public class HardCandy implements Candy{
+	private String name;
+	private double price;
+	private int quantity;
+	private double weight;
+	
+	public HardCandy(String name, double price, double weight, int quantity) {
+		this.name = name;
+		this.price = price;
+		this.quantity = quantity;
+		this.weight = weight;
+	}
+	@Override
+    public String getName() {
+        return name ;
+    }
+    public double getWeight(){
+        return weight;
+    }
+    public double getPrice(){ 
+        return price;
+    }
+    @Override
+    public int getQuantity() {
+    	return quantity;
+    }
+    @Override
+    public void setPrice(double price) {
+    	this.price = price;
+    }
+    @Override
+    public void prepare() {
+        System.out.println("This is hard candy.");
+    }
+    @Override
+    public String toString(){
+        return getName() + " $" + getPrice() + ", " + getWeight() + "grams";
+    }
+}
+
+
+public class HardCandyBag implements CandyPackage{
+	private double price = 2.00;
+    @Override 
+    public void pack(Candy candy){
+        System.out.println("Packing " + candy.getName() + " is in a clear plastic bag.");
+    }
+    @Override
+    public double getPrice(){
+        return price;
+    }
+
+}
+
+
+public class HardCandyFactory implements CandyFactory{
+	@Override
+    public Candy createCandy(){
+        return new HardCandy("Hard", 1.75, .05, 20);
+    }
+	@Override 
+	public Candy createCandy(double price) {
+		return new HardCandy("Gummy", price, .05, 20);
+	}
+    @Override
+    public CandyPackage createPackage(){
+        return new HardCandyBag();
+    }
+    @Override
+    public Candy createCandy(Candy original) {
+        return new HardCandy(
+            original.getName(),
+            original.getPrice(),
+            original.getWeight(),  
+            original.getQuantity()
+        );
+    }
+}
+
+import java.util.Map;
+import java.util.HashMap;
+public class Inventory {
+	private static Inventory instance;
+    private Map<String, Integer> stock;
+    
+    private Inventory(){
+        stock = new HashMap<>();
+    }
+    public static Inventory getInstance(){
+        if (instance==null){
+            instance = new Inventory();
+        }
+        return instance;
+    }
+    public void addCandy(String candyName, int quantity){
+        stock.put(candyName, stock.getOrDefault(candyName, 0) + quantity);
+    }
+    public void removeCandy(String candyName, int quantity){
+        if (stock.containsKey(candyName)){
+            int current = stock.get(candyName);
+            int updated = Math.max(0, current - quantity);
+            stock.put(candyName, updated);
+        }
+    }
+    //check stock
+    public int getStock(String candyName){
+        return stock.getOrDefault(candyName, 0);
+    }
+    public void displayInventory(){
+        System.out.println("\n Current Inventory: ");
+        for (Map.Entry<String, Integer> entry : stock.entrySet()){
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+    }
+}
+
+
+public class InventoryItem {
+	private Candy candy;
+    private int quantity;
+    
+    public InventoryItem(Candy candy, int quantity){
+        this.candy = candy;
+        this.quantity = quantity;
+    }
+    public Candy getCandy(){
+        return candy;
+    }
+    public int getQuantity(){
+        return quantity;
+    }
+    public void reduceQuantity(int amount){
+        if (amount <= quantity){
+            quantity -=amount;
+        }
+    }
+}
+
+//Author: Kelly Payne Command Pattern used
+import java.util.List;
+public interface PricingCommand {
+	double apply(List<Candy> items);
+}
+
+// Author: Kelly Payne
+// Uses Command pattern - this class gives us regular prices
+import java.util.List;
+public class RegPricingCommand implements PricingCommand{
+	public double apply(List<Candy> items){
+        return items.stream().mapToDouble(Candy::getPrice).sum();
+    }
+}
+
+
+public class RemoveItemCommand implements CartCommand {
+	private ShoppingCart cart;
+	private Candy item;
+	
+	public RemoveItemCommand(ShoppingCart cart, Candy item) {
+		this.cart = cart;
+		this.item = item;
+	}
+	@Override 
+	public void execute() {
+		cart.removeItem(item);
+		System.out.println(item.getName() + " removed from cart.");
+	}
+}
+
+//Author: Kelly Payne
+// Shopping Cart and Data Holder
+import java.util.*;
+public class ShoppingCart {
+	private List<Candy> items = new ArrayList<>();
+	private List<CandyPackage> packages = new ArrayList<>();
+	   
+	   public void addItem(Candy candy, CandyPackage candyPackage){
+	       items.add(candy);
+	       packages.add(candyPackage);
+	       System.out.println(candy.getName() + " was added to cart.");
+	   }
+	   public void removeItem(Candy candy) {
+		   int index = items.indexOf(candy);
+		   if (index >= 0) {
+			   items.remove(index);
+			   packages.remove(index);
+		   }
+		}
+	   public void viewCart(){
+	       System.out.println("\nYour Cart: ");
+	       double total = 0;
+	       for (int i=0; i<items.size(); i++) {
+	    	   Candy candy = items.get(i);
+	    	   CandyPackage candyPackage = packages.get(i);
+	    	   
+	    	   double candyPrice = candy.getPrice();
+	    	   double packagePrice = (candyPackage != null)? candyPackage.getPrice() : 0;
+	    	   System.out.printf("* %s: $%.2f%s%n", candy.getName(), candyPrice, (candyPackage != null ? " + Packaging: $" + packagePrice: ""));
+	    	   total += candyPrice + packagePrice;
+	       }
+	       System.out.printf("Total: $%.2f%n", total);
+	   }
+	   public List<Candy> getItems(){
+	       return items;
+	   }
+	   public void clear() {
+		   items.clear();
+		   System.out.println("Cart has been cleared.");
+	   }
+	   public List<CandyPackage> getPackages(){
+		   return packages;
+	   }
+}
+
+// chatgpt helped me greatly with this class as I have never done an UI other than text based.
+import javafx.application.Application;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javafx.collections.FXCollections;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.collections.ObservableList;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import java.util.List;
+import java.util.ArrayList;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ListCell;
+public class TestFX extends Application {
+	private List<Candy> cart = new ArrayList<>();
+	{cart.size();}
+	private double totalPrice = 0.0;
+	//private TextFormatter<Integer> formatter;
+	private void clearCart(ObservableList<Candy> cartItems, Label totalLabel) {
+		cartItems.clear(); // clears UI list
+		totalPrice = 0.0; // resets total
+		totalLabel.setText("Total: $0.00");
+		System.out.println("Your cart has been cleared.");
+	}
+	private void processCheckout(ObservableList<Candy> cartItems, Label totalLabel,
+			ListView<Candy> cartListView, BorderPane borderPane, VBox loginBox) {
+    	if (cartItems.isEmpty()) {
+    		showAlert("Cart Empty", "Your cart is empty. You can add items before checking out.");
+    		return;
+    	}
+    	Map<String, Long> summary = cartItems.stream()
+    			.collect(Collectors.groupingBy(Candy::getName, Collectors.counting()));
+    	StringBuilder sb = new StringBuilder();
+    	sb.append("Order Summary:\n\n");
+    	summary.forEach((name, qty) -> sb.append(name).append(" x").append(qty).append("\n"));
+    	sb.append("\nTotal: ").append(String.format("$%.2f", totalPrice));
+    	sb.append("\n\nProceed with checkout?");
+    	
+    	Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+    	confirm.setTitle("Confirm Checkout");
+    	confirm.setHeaderText("Please confirm that your order is correct");
+    	confirm.setContentText(sb.toString());
+    	
+    	confirm.showAndWait().ifPresent(response -> {
+    		if (response == ButtonType.OK) {
+    			String orderId = UUID.randomUUID().toString().substring(0,8).toUpperCase();
+    			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    			// process order
+    			String receipt = "Order ID: " + orderId + "\nDate: " + timestamp + "\n\n" + sb.toString();
+    			
+    			Alert info = new Alert(Alert.AlertType.INFORMATION);
+    			info.setTitle("Order Placed");
+    			info.setHeaderText("Thank you for your order!");
+    			info.setContentText(receipt);
+    			info.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+    			info.showAndWait();
+    			
+    			cartItems.clear();
+    			totalPrice = 0.0;
+    			totalLabel.setText("Total: $0.00");
+    			borderPane.setCenter(loginBox);
+    		}
+    	});
+	}
+       
+    	
+	private void showAlert(String title, String message) {
+		Alert alert = new Alert(Alert.AlertType.WARNING);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
+	private int parseQuantity(String text) {
+		try {
+			return Integer.parseInt(text);
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+	
+	@Override
+	public void start(Stage stage) {
+		// setting up UI 
+		TextField quantityField = new TextField();
+		quantityField.setPromptText("Quantity");
+		
+		TextFormatter<Integer> formatter = new TextFormatter<>(change -> {
+			String newText = change.getControlNewText();
+			if (newText.matches("[1-9]|1[0-9]")) {
+				return change;
+				}
+			return null;
+			});
+		quantityField.setTextFormatter(formatter);
+				
+		quantityField.setOnMouseClicked(e -> quantityField.clear());
+		quantityField.setOnKeyPressed(e -> {
+			if (!quantityField.getText().isEmpty()) {
+				quantityField.selectAll();
+			}
+		});
+		//Login UI
+		Label titleLabel = new Label("Customer Login");
+		TextField usernameField = new TextField();
+		usernameField.setPromptText("Username");
+		        
+		PasswordField passwordField = new PasswordField();
+		passwordField.setPromptText("Password");
+		        
+		Label messageLabel = new Label();
+		Button loginButton = new Button("Login");
+								
+		VBox loginBox = new VBox(10,titleLabel, usernameField, passwordField, loginButton, messageLabel);
+		loginBox.setAlignment(Pos.CENTER);
+		loginBox.setPadding(new Insets(20));
+	
+		CandyStore store = CandyStore.getInstance();
+		ObservableList<Candy> catalogList = FXCollections.observableArrayList(store.getCatalog());
+		
+		ObservableList<Candy> cartItems = FXCollections.observableArrayList();
+		
+		ListView<Candy> candyListView = new ListView<>();
+		candyListView.setItems(catalogList);
+		candyListView.setPrefHeight(200);
+		
+		ListView<Candy> cartListView = new ListView<>();
+		cartListView.setItems(cartItems);
+		cartListView.setPrefHeight(200);
+		cartListView.setCellFactory(lv -> new ListCell<Candy>() {
+			@Override
+			protected void updateItem(Candy candy, boolean empty) {
+				super.updateItem(candy, empty);
+				if (empty || candy == null) {
+					setText(null);
+					setGraphic(null);
+				}else {
+					setText(candy.getName() + " $" + candy.getPrice());
+				}
+			}
+		});
+		Label packageLabel = new Label("Choose package type:");
+		RadioButton boxOption = new RadioButton("Box");
+		RadioButton bagOption = new RadioButton("Bag");
+		RadioButton noPackageOption = new RadioButton("No Box/Bag");
+		ToggleGroup packageGroup = new ToggleGroup();
+		noPackageOption.setToggleGroup(packageGroup);
+		boxOption.setToggleGroup(packageGroup);
+		bagOption.setToggleGroup(packageGroup);
+		noPackageOption.setSelected(true);
+		
+		Label totalLabel = new Label("Total: $0.00");
+		Button addToCartButton = new Button("Add to Cart");
+		
+		Button clearCartButton = new Button("Clear Cart");
+		clearCartButton.setOnAction(e -> clearCart(cartItems, totalLabel));
+		
+		      
+		addToCartButton.setOnAction(e -> {
+			Candy selectedCandy = candyListView.getSelectionModel().getSelectedItem();
+		    if (selectedCandy !=null) {
+		    	int quantity = parseQuantity(quantityField.getText());
+		    	if (quantity > 0) {
+		    		cartItems.add(selectedCandy);
+		        	totalPrice += selectedCandy.getPrice() * quantity;
+		        	cartListView.setItems(cartItems);
+		        	totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
+		        	
+		        	quantityField.clear();
+		        	
+		        	packageGroup.selectToggle(noPackageOption);
+		       	} else {
+		       		showAlert("Invalid Quantity", "Please enter a valid quantity");
+		        }
+		        		
+		      } else {
+		 	  showAlert("No Selection", "Please select a candy to add to cart.");
+		      }
+		 });
+		 
+		//Layout
+		BorderPane borderPane = new BorderPane();
+		
+		Region top = new Region();
+        top.setPrefHeight(50);
+        top.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        Region bottom = new Region();
+        bottom.setPrefHeight(50);
+        bottom.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        Region left = new Region();
+        left.setPrefWidth(50);
+        left.setBackground(new Background(new BackgroundFill(Color.PURPLE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        Region right = new Region();
+        right.setPrefWidth(50);
+        right.setBackground(new Background(new BackgroundFill(Color.PURPLE, CornerRadii.EMPTY, Insets.EMPTY)));
+        
+        Button logOutButton = new Button("Log Out");
+		logOutButton.setOnAction(e -> {
+			clearCart(cartItems, totalLabel); // clears cart when log out
+			borderPane.setCenter(loginBox); // goes back to login screen
+		});
+		
+		Button checkoutButton = new Button("Checkout");
+		checkoutButton.setOnAction(e -> processCheckout(cartItems, totalLabel,
+				cartListView, borderPane, loginBox));
+		
+		HBox packageBox = new HBox(10, packageLabel, boxOption, bagOption);
+		packageBox.setAlignment(Pos.CENTER);
+		
+		VBox cartBox = new VBox(10,
+				 new Label("Available Candy:"), candyListView,
+		         quantityField, addToCartButton, clearCartButton,logOutButton, checkoutButton,
+		         packageBox, noPackageOption,
+		         new Label("Your Cart:"), cartListView, totalLabel);
+		         cartBox.setPadding(new Insets(20));  
+		         cartBox.setAlignment(Pos.CENTER);
+		         
+        borderPane.setTop(top);
+		borderPane.setBottom(bottom);
+		borderPane.setLeft(left);
+		borderPane.setRight(right);
+		borderPane.setCenter(loginBox);
+		List<Customer> customers = new ArrayList<>();
+		customers.add(new Customer("mary", "5432"));
+		customers.add(new Customer("bob", "password"));
+		
+		borderPane.setCenter(loginBox); 
+        //Handle login
+        loginButton.setOnAction(e->{
+        	String username = usernameField.getText().trim();
+        	String password = passwordField.getText().trim();
+        	boolean valid = false;
+        	for (Customer c : customers) {
+        		if (c.authenticate(username, password)) {
+        			messageLabel.setText("Welcome, " + c.getUsername() + "!");
+        			messageLabel.setTextFill(Color.DARKGREY);
+        			valid = true;
+        			
+        			// CartView
+        			borderPane.setCenter(cartBox); //replaces login screen
+        			break;
+        		}
+        	}
+        	if (!valid) {
+        		messageLabel.setText("Invalid username or password");
+        		messageLabel.setTextFill(Color.RED);
+        	}
+        });
+        
+        //Scene setup
+        Scene scene = new Scene(borderPane, 400, 300);
+		stage.setScene(scene);
+		stage.setTitle("Candy Store Login");
+		stage.show();
+	}
+	      
+	public static void main(String[] args) {
+		launch(args);
+	}
+}
