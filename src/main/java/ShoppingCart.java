@@ -1,4 +1,3 @@
-
 /**
  * Write a description of class ShoppingCart here.
  * Shopping Cart and Data Holder
@@ -13,6 +12,9 @@ public class ShoppingCart
    public void addItem(Candy candy){
        items.add(candy);
        System.out.println(candy.getName() + " was added to cart.");
+   }
+   public void removeItem(Candy candy){
+    items.remove(candy);
    }
    public void viewCart(){
        System.out.println("\n Your Cart: ");
