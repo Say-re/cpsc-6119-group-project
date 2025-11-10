@@ -31,4 +31,19 @@ public class CustomerDataManager {
         } catch (IOException ignored) {}
         return Optional.empty();
     }
+
+    /**
+     * Get all customers
+     */
+    public List<Customer> getAllCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        try {
+            for (String[] row : CsvUtil.read(file)) {
+                if (row.length >= 5) {
+                    customers.add(new Customer(row[0], row[1], row[4]));
+                }
+            }
+        } catch (IOException ignored) {}
+        return customers;
+    }
 }

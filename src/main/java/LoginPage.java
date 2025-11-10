@@ -6,6 +6,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import ui.AdminDashboard;
+import auth.UserManager;
+import auth.UserAccount;
 
 /**
  * Login Page for Candy Store Application
@@ -328,12 +331,13 @@ public class LoginPage extends Application {
 
             alert.showAndWait();
 
-            // TODO: Transition to main application based on role
-            // if (account.getRole().equals("admin")) {
-            //     showAdminDashboard();
-            // } else {
-            //     showCustomerDashboard();
-            // }
+            // Transition to main application based on role
+            if (account.getRole().equals("admin")) {
+                showAdminDashboard(account);
+            } else {
+                // TODO: Show customer dashboard/store interface
+                System.out.println("Customer dashboard not yet implemented");
+            }
         } else {
             // Failed login
             showFieldError(passwordErrorLabel, "Invalid username or password", passwordField);
@@ -830,6 +834,29 @@ public class LoginPage extends Application {
     private void hideFieldError(Label errorLabel) {
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
+    }
+
+    /**
+     * Show admin dashboard for admin users
+     */
+    private void showAdminDashboard(UserAccount account) {
+        // Close login window
+        Stage loginStage = (Stage) mainContainer.getScene().getWindow();
+        loginStage.close();
+
+        // Launch admin dashboard
+        try {
+            AdminDashboard dashboard = new AdminDashboard(account);
+            Stage dashboardStage = new Stage();
+            dashboard.start(dashboardStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Failed to load Admin Dashboard");
+            errorAlert.setContentText("An error occurred while opening the dashboard: " + e.getMessage());
+            errorAlert.showAndWait();
+        }
     }
 
     public static void main(String[] args) {

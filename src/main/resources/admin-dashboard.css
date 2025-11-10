@@ -1,0 +1,133 @@
+/* Admin Dashboard CSS - Sweet Factory Theme */
+
+/* Root Variables */
+:root {
+    -fx-candy-primary: #ff6b9d;
+    -fx-candy-surface: #FAFAFA;
+    -fx-text-primary: #2C3E50;
+    -fx-text-secondary: #7F8C8D;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    -fx-background-color: #FAFAFA;
+}
+
+/* Header */
+.dashboard-header {
+    -fx-background-color: white;
+    -fx-border-color: rgba(0, 0, 0, 0.1);
+    -fx-border-width: 0 0 1 0;
+}
+
+.header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;
+}
+
+.header-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7F8C8D;
+}
+
+/* Stats Cards */
+.stats-card {
+    -fx-background-color: white;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);
+}
+
+.stats-card-title {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7F8C8D;
+}
+
+.stats-card-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;
+}
+
+.stats-card-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7F8C8D;
+}
+
+/* Table Styling */
+.data-table {
+    -fx-background-color: white;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+}
+
+.data-table .table-row-cell {
+    -fx-cell-size: 40px;
+}
+
+.data-table .table-row-cell:hover {
+    -fx-background-color: #FFF0F5;
+}
+
+.data-table .table-column {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* Status Badge */
+.status-badge {
+    -fx-background-radius: 6px;
+    -fx-padding: 4px 12px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Tabs */
+.tab-pane {
+    -fx-background-color: white;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #f3f3f5;
+    -fx-background-radius: 10px 10px 0 0;
+    -fx-padding: 12px 24px;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #ff6b9d;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+.tab-pane .tab-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;
+}
+
+/* Buttons */
+.logout-button {
+    -fx-background-color: white;
+    -fx-text-fill: #ff6b9d;
+    -fx-border-color: #ff6b9d;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 8px 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.logout-button:hover {
+    -fx-background-color: #ff6b9d;
+    -fx-text-fill: white;
+}
