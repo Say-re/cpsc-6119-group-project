@@ -1,3 +1,4 @@
+//chatgpt helped with some of this coding particularly bugs
 import java.util.Scanner;
 
 public class ConsoleUI {
@@ -35,8 +36,9 @@ public class ConsoleUI {
 		if (selectedItem !=null && selectedItem.getQuantity()>0) {
 			CandyFactory factory = getFactoryForCandy(selectedItem.getCandy());
 			Candy candy = factory.createCandy();
+			CandyPackage candyPackage = factory.createPackage();
 		
-			cart.addItem(candy);
+			cart.addItem(candy, candyPackage);
 			Inventory.getInstance().removeCandy(selectedItem.getCandy().getName(), 1);
 			System.out.println(selectedItem.getCandy().getName() + " was added to your cart.");
 		}else {
@@ -51,6 +53,8 @@ public class ConsoleUI {
 			return new ChocolateCandyFactory();
 		} else if (candy instanceof HardCandy){
 			return new HardCandyFactory();
+		} else if (candy instanceof BaseCandy){
+			return new BaseCandyFactory();
 		} else {
 			throw new IllegalArgumentException("No factory found for this candy: " + candy.getClass().getSimpleName());
 		}
