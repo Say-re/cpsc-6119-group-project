@@ -8,6 +8,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import service.BackendFacade;
 import ui.AdminDashboard;
+import ui.CustomerDashboard;
 import auth.UserManager;
 import auth.UserAccount;
 
@@ -336,8 +337,7 @@ public class LoginPage extends Application {
     if ("admin".equalsIgnoreCase(account.getRole())) {
         showAdminDashboard(account);
     } else {
-        // TODO: Show customer dashboard/store interface
-        System.out.println("Customer dashboard not yet implemented");
+        showCustomerDashboard(account);
     }
 } else {
     // Failed login
@@ -863,6 +863,34 @@ private void showAdminDashboard(UserAccount account) {
         Alert alert = new Alert(
                 Alert.AlertType.ERROR,
                 "Could not open Admin Dashboard:\n" + e.getMessage(),
+                ButtonType.OK
+        );
+        alert.showAndWait();
+    }
+}
+
+/**
+ * Redirects customer users to the Customer Dashboard
+ */
+private void showCustomerDashboard(UserAccount account) {
+    try {
+        // Create CustomerDashboard instance with current user
+        CustomerDashboard dashboard = new CustomerDashboard(account);
+
+        // Reuse the same stage the login page is using
+        Stage stage = (Stage) mainContainer.getScene().getWindow();
+
+        // Start the customer dashboard UI on that stage
+        dashboard.start(stage);
+
+        stage.setTitle("Sweet Factory — Customer Dashboard");
+        stage.show();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Alert alert = new Alert(
+                Alert.AlertType.ERROR,
+                "Could not open Customer Dashboard:\n" + e.getMessage(),
                 ButtonType.OK
         );
         alert.showAndWait();
