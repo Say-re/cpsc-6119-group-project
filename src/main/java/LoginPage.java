@@ -6,6 +6,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import service.BackendFacade;
 import ui.AdminDashboard;
 import auth.UserManager;
 import auth.UserAccount;
@@ -313,45 +314,46 @@ public class LoginPage extends Application {
         // Attempt authentication
         UserAccount account = userManager.authenticate(username, password);
 
-        if (account != null) {
-            // Successful login
-            System.out.println("Login successful for user: " + username + " (Role: " + account.getRole() + ")");
+       if (account != null) {
+    // Successful login
+    System.out.println("Login successful for user: " + username + " (Role: " + account.getRole() + ")");
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Login Successful");
-            alert.setHeaderText(null);
-            String welcomeMessage = "Welcome, " + username + "!\n\n" +
-                "Role: " + account.getRole() + "\n" +
-                "Email: " + account.getEmail() + "\n\n" +
-                "You would now be redirected to the main application.";
-            alert.setContentText(welcomeMessage);
+    // Initialize backend services once the user is known
+    BackendFacade.init();
 
-            // Style the alert
-            styleDialog(alert.getDialogPane(), "Login Successful", welcomeMessage);
+    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle("Login Successful");
+    alert.setHeaderText(null);
+    String welcomeMessage = "Welcome, " + username + "!\n\n" +
+        "Role: " + account.getRole() + "\n" +
+        "Email: " + account.getEmail() + "\n\n" +
+        "You would now be redirected to the main application.";
+    alert.setContentText(welcomeMessage);
+    styleDialog(alert.getDialogPane(), "Login Successful", welcomeMessage);
+    alert.showAndWait();
 
-            alert.showAndWait();
-
-            // Transition to main application based on role
-            if (account.getRole().equals("admin")) {
-                showAdminDashboard(account);
-            } else {
-                // TODO: Show customer dashboard/store interface
-                System.out.println("Customer dashboard not yet implemented");
-            }
-        } else {
-            // Failed login
-            showFieldError(passwordErrorLabel, "Invalid username or password", passwordField);
-            usernameField.setStyle(usernameField.getStyle() + "-fx-border-color: #E74C3C; -fx-border-width: 2px;");
-            passwordField.setStyle(passwordField.getStyle() + "-fx-border-color: #E74C3C; -fx-border-width: 2px;");
-        }
+    // Transition to main application based on role
+    if ("admin".equalsIgnoreCase(account.getRole())) {
+        showAdminDashboard(account);
+    } else {
+        // TODO: Show customer dashboard/store interface
+        System.out.println("Customer dashboard not yet implemented");
     }
+} else {
+    // Failed login
+    showFieldError(passwordErrorLabel, "Invalid username or password", passwordField);
+    usernameField.setStyle(usernameField.getStyle() + "-fx-border-color: #E74C3C; -fx-border-width: 2px;");
+    passwordField.setStyle(passwordField.getStyle() + "-fx-border-color: #E74C3C; -fx-border-width: 2px;");
+}
+    }
+
 
     /**
      * Handles forgot password link click with recovery question flow
      */
     private void handleForgotPassword() {
         System.out.println("Forgot password clicked");
-
+    
         // Step 1: Ask for username
         TextInputDialog usernameDialog = new TextInputDialog();
         usernameDialog.setTitle("Password Recovery");
@@ -831,35 +833,44 @@ public class LoginPage extends Application {
     /**
      * Hide field error
      */
-    private void hideFieldError(Label errorLabel) {
-        errorLabel.setVisible(false);
-        errorLabel.setManaged(false);
-    }
+  /**
+ * Hide field error
+ */
+private void hideFieldError(Label errorLabel) {
+    errorLabel.setVisible(false);
+    errorLabel.setManaged(false);
+}
 
-    /**
-     * Show admin dashboard for admin users
-     */
-    private void showAdminDashboard(UserAccount account) {
-        // Close login window
-        Stage loginStage = (Stage) mainContainer.getScene().getWindow();
-        loginStage.close();
+/**
+ * Redirects admin users to the Admin Dashboard
+ */
+private void showAdminDashboard(UserAccount account) {
+    try {
+        // Create AdminDashboard instance with current user
+        AdminDashboard dashboard = new AdminDashboard(account);
 
-        // Launch admin dashboard
-        try {
-            AdminDashboard dashboard = new AdminDashboard(account);
-            Stage dashboardStage = new Stage();
-            dashboard.start(dashboardStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-            errorAlert.setTitle("Error");
-            errorAlert.setHeaderText("Failed to load Admin Dashboard");
-            errorAlert.setContentText("An error occurred while opening the dashboard: " + e.getMessage());
-            errorAlert.showAndWait();
-        }
-    }
+        // Reuse the same stage the login page is using
+        Stage stage = (Stage) mainContainer.getScene().getWindow();
 
-    public static void main(String[] args) {
-        launch(args);
+        // Start the admin dashboard UI on that stage
+        dashboard.start(stage);
+
+        stage.setTitle("Sweet Factory — Admin Dashboard");
+        stage.show();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Alert alert = new Alert(
+                Alert.AlertType.ERROR,
+                "Could not open Admin Dashboard:\n" + e.getMessage(),
+                ButtonType.OK
+        );
+        alert.showAndWait();
     }
 }
+
+public static void main(String[] args) {
+    launch(args);
+}
+}
+
