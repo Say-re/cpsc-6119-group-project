@@ -10,5 +10,7 @@ public interface Candy
     String getName();
     double getWeight();
     double getPrice();
+    void setPrice(double price);
+    int getQuantity();
     void prepare();
 }

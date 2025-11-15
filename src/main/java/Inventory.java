@@ -1,15 +1,7 @@
-
-/**
- * Write a description of class Inventory here.
- * Singleton Pattern used here when we created one shared instance 
- * @author (your name)
- * @version (a version number or a date)
- */
 import java.util.Map;
 import java.util.HashMap;
-public class Inventory
-{
-    private static Inventory instance;
+public class Inventory {
+	private static Inventory instance;
     private Map<String, Integer> stock;
     
     private Inventory(){
@@ -24,6 +16,7 @@ public class Inventory
     public void addCandy(String candyName, int quantity){
         stock.put(candyName, stock.getOrDefault(candyName, 0) + quantity);
     }
+    
     public void removeCandy(String candyName, int quantity){
         if (stock.containsKey(candyName)){
             int current = stock.get(candyName);
