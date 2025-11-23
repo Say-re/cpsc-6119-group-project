@@ -14,7 +14,6 @@ import java.util.Map;
  * Integrates with InventoryDataManager for persistence and InventorySubject for low stock notifications.
  * Uses the Observer pattern to notify when stock levels are low.
  *
- * @author Travis Dagostino
  * @version 1.0
  * @since 2025-11-22
  */
