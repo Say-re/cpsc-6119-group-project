@@ -1,14 +1,6 @@
-
-/**
- * Write a description of class Catalog here.
- *
- * @author (your name)
- * @version (a version number or a date)
- */
 import java.util.List;
-public class Catalog
-{
-    public void showCatalog(List<InventoryItem> inventory){
+public class Catalog {
+	public void showCatalog(List<InventoryItem> inventory){
         System.out.println(" Available Candy:\n");
         int index = 1;
         for (InventoryItem item : inventory){
