@@ -6,23 +6,46 @@ import java.util.List;
 import com.opencsv.CSVReader;
 
 public class CandyStore {
-	private static CandyStore instance= null;
+	private static CandyStore instance = null;
 	private List<Candy> catalog = new ArrayList<>();
 	private Inventory inventory = Inventory.getInstance();
 	   
-	   private CandyStore(){
-		   loadInventFromCSV("data.csv");
-	       
+	private CandyStore(){
+		loadInventFromCSV("data.csv");
+	}
+	public static CandyStore getInstance() {
+		if (instance == null) {
+			instance = new CandyStore();
+		}
+		return instance;
+	}
+	public List<Candy> getCatalog(){
+		   return catalog;
+	}
+	public List<InventoryItem> getInventory() {
+		List<InventoryItem> inventoryItems = new ArrayList<>();
+		for (Candy candy : catalog) {
+			int quantity = inventory.getStock(candy.getName());
+			inventoryItems.add(new InventoryItem(candy, quantity));
+		}
+		return inventoryItems;
+	}
+	   public InventoryItem getInventoryItemByIndex(int index) {
+		   List<InventoryItem> inventoryItems = getInventory();
+		   if (index >= 0 && index < inventoryItems.size()) {
+			   return inventoryItems.get(index);
+		   }
+		   return null;
 	   }
 	   public void loadInventFromCSV(String filepath) {
-		   try (InputStream input = CandyStore.class.getResourceAsStream("/src/main/java/data/inventory.csv")){
+		   try (InputStream input = CandyStore.class.getResourceAsStream("/data.csv")){
 			   if (input == null) {
-				   System.err.println("File not found in classpath: /src/main/java/data/inventory.csv");
+				   System.err.println("File not found in classpath: /data.csv");
 				   loadDefaultCatalogAndInvent();
 				   return;
-			   }
+		   }
 		   
-		   try (CSVReader reader = new CSVReader(new InputStreamReader(input))){
+			   try (CSVReader reader = new CSVReader(new InputStreamReader(input))){
 		   	   String[] line;
 			   reader.readNext();
 			   while ((line = reader.readNext()) != null) {
@@ -47,7 +70,7 @@ public class CandyStore {
 				   }
 				   Candy candy = createCandy(name, price, weight, stock);
 				   catalog.add(candy);
-				   inventory.addCandy(candy.getName(), stock);
+				   inventory.addCandy(candy, stock);
 				}
 			  }
 		   }catch (Exception e) {
@@ -77,32 +100,9 @@ public class CandyStore {
 		   catalog.add(gummy);
 		   catalog.add(chocolate);
 		   catalog.add(hard);
-		   inventory.addCandy(gummy.getName(), 15);
-		   inventory.addCandy(chocolate.getName(), 20);
-		   inventory.addCandy(hard.getName(), 10);
+		   inventory.addCandy(gummy, 15);
+		   inventory.addCandy(chocolate, 20);
+		   inventory.addCandy(hard, 10);
 	   }
-	   public static CandyStore getInstance(){
-	       if (instance == null){
-	           instance = new CandyStore();
-	       }
-	       return instance;
-	   }
-	   public List<Candy> getCatalog(){
-	       return catalog;
-	   }
-	   public List<InventoryItem> getInventory(){
-	       List<InventoryItem> inventoryItems = new ArrayList<>();
-	       for (Candy candy : catalog){
-	           int qty = inventory.getStock(candy.getName());
-	           inventoryItems.add(new InventoryItem(candy, qty));
-	       }
-	       return inventoryItems;
-	   }
-	   public InventoryItem getInventoryItemByIndex(int index){
-	       List<InventoryItem> inventoryItems = getInventory();
-	       if (index >= 0 && index < inventoryItems.size()){
-	           return inventoryItems.get(index);
-	       }
-	       return null;
-	   }
+	  
 }

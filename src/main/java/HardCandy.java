@@ -15,12 +15,10 @@ public class HardCandy implements Candy{
     public String getName() {
         return name ;
     }
-    @Override
     public double getWeight(){
         return weight;
     }
-    @Override
-    public double getPrice(){
+    public double getPrice(){ 
         return price;
     }
     @Override

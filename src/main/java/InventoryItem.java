@@ -1,13 +1,6 @@
 
-/**
- * Write a description of class InventoryItem here.
- *
- * @author (your name)
- * @version (a version number or a date)
- */
-public class InventoryItem
-{
-    private Candy candy;
+public class InventoryItem {
+	private Candy candy;
     private int quantity;
     
     public InventoryItem(Candy candy, int quantity){

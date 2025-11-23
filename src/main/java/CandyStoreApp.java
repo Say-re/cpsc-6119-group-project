@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
-
+// chatgpt helped with some parts of this code and a lot of debugging.
 public class CandyStoreApp {
 
 	public static void main(String[] args) {
@@ -91,7 +91,7 @@ public class CandyStoreApp {
         cart.viewCart();
         PricingCommand pricing = new RegPricingCommand();
         Checkout processor = new Checkout(pricing);
-        processor.checkout(cart.getItems());
+        processor.checkout(loginCustomer, cart);
        
         Order order = new Order(cart.getItems());
         loginCustomer.addOrder(order);
@@ -157,7 +157,7 @@ public class CandyStoreApp {
                     Candy candy = factory.createCandy();
                     candy.prepare();
                     for (int i = 0; i < quantity; i++) {
-                        inventory.addCandy(name, 1);
+                        inventory.addCandy(candy, 1);
                         totalAdded++;
                     }
                 }

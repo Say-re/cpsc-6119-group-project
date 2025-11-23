@@ -1,5 +1,6 @@
 // chatgpt helped me greatly with this class as I have never done an UI other than text based.
 import javafx.application.Application;
+import javafx.scene.layout.Pane;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ListCell;
 public class TestFX extends Application {
+	private VBox cartBox;
 	private Customer loggedInCustomer;
 	private ShoppingCart shoppingCart = new ShoppingCart();
 	private List<Candy> cart = new ArrayList<>();
@@ -39,7 +41,7 @@ public class TestFX extends Application {
 		System.out.println("Your cart has been cleared.");
 	}
 	private void processCheckout(ObservableList<Candy> cartItems, Label totalLabel,
-			ListView<Candy> cartListView, BorderPane borderPane, VBox loginBox) {
+			ListView<Candy> cartListView, BorderPane borderPane, VBox loginBox, Customer loggedInCustomer, Pane dashboardView) {
     	if (cartItems.isEmpty()) {
     		showAlert("Cart Empty", "Your cart is empty. You can add items before checking out.");
     		return;
@@ -59,6 +61,9 @@ public class TestFX extends Application {
     	
     	confirm.showAndWait().ifPresent(response -> {
     		if (response == ButtonType.OK) {
+    			Order newOrder = new Order(new ArrayList<>(cartItems));
+    			loggedInCustomer.addOrder(newOrder);
+    			
     			String orderId = UUID.randomUUID().toString().substring(0,8).toUpperCase();
     			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     			// process order
@@ -74,7 +79,7 @@ public class TestFX extends Application {
     			cartItems.clear();
     			totalPrice = 0.0;
     			totalLabel.setText("Total: $0.00");
-    			borderPane.setCenter(loginBox);
+    			borderPane.setCenter(dashboardView);
     		}
     	});
 	}
@@ -131,7 +136,7 @@ public class TestFX extends Application {
 		loginBox.setPadding(new Insets(20));
 	    // Candy Store & Inventory
 		CandyStore store = CandyStore.getInstance();
-		ObservableList<InventoryItem> catalogList = FXCollections.observableArrayList(store.getInventory());
+		ObservableList<InventoryItem> catalogList = FXCollections.observableList(Inventory.getInstance().getInventory());
 		
 		ListView<InventoryItem> candyListView = new ListView<>();
 		candyListView.setItems(catalogList);
@@ -181,11 +186,21 @@ public class TestFX extends Application {
 		    	showAlert("No Selection,", "Please add candy to your cart.");
 		    	return;
 		    }
-		    int quantity = parseQuantity(quantityField.getText());	
+			int quantity = parseQuantity(quantityField.getText());
+
 		    if (quantity <= 0) {
 		    	showAlert("Invalid Quantity", "Please enter a valid quantity.");
 		    	return;
 		    }
+		    String candyName = selectedItem.getCandy().getName();
+		    int stock = Inventory.getInstance().getStock(candyName);
+		    if (quantity > stock) {
+		    	showAlert("Not enough in stock", "Only" + stock + " is left in stock.");
+		    	return;
+		    }
+			Inventory.getInstance().removeCandy(candyName, quantity);
+			candyListView.refresh();
+			
 		    CandyPackage packageObj = null;
 		    Candy candy = selectedItem.getCandy();
 		    		
@@ -209,13 +224,18 @@ public class TestFX extends Application {
 		   	}else {
 		   		System.out.println(candy.getName() + " packaging has not been chosen");
 		   	}
+		    if (selectedItem.getQuantity() < quantity) {
+		    	showAlert("Not enough in stock", "Only" + selectedItem.getQuantity() + " left in stock.");
+		    	return;
+		    }
+		   		   
 		   double total = 0.0; 	
 		   for (int i = 0; i<quantity; i++) {
 			   shoppingCart.addItem(candy, packageObj);
 		   }
-			   cartItems.clear();
-			   totalPrice = 0.0;
-			  // List<Candy> items = shoppingCart.getItems();
+		   cartItems.clear();
+		   totalPrice = 0.0;
+			  
 			   for (Candy c : shoppingCart.getItems()) {
 				   CandyPackage cp = shoppingCart.getPackageFor(c);
 				   double itemTotal = c.getPrice() + (cp != null ? cp.getPrice() : 0);
@@ -234,8 +254,8 @@ public class TestFX extends Application {
 			   }
 		   
 		       totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
-		       quantityField.clear();
-		       packageGroup.selectToggle(noPackageOption);
+		     
+		    //   packageGroup.selectToggle(noPackageOption);
 		});
 		 
 		//Layout
@@ -262,34 +282,25 @@ public class TestFX extends Application {
 			clearCart(cartItems, totalLabel); // clears cart when log out
 			borderPane.setCenter(loginBox); // goes back to login screen
 		});
-		
-		Button checkoutButton = new Button("Checkout");
-		checkoutButton.setOnAction(e -> processCheckout(cartItems, totalLabel,
-				cartListView, borderPane, loginBox));
-		if (!cartItems.isEmpty() && loggedInCustomer != null) {
-			Order newOrder = new Order(cartItems); // create new order
-			loggedInCustomer.addOrder(newOrder);
-			cartItems.clear();
-			cartListView.getItems().clear();
-			totalLabel.setText("Total: $0.00");
-		}
-	
 		HBox packageBox = new HBox(10, packageLabel, boxOption, bagOption);
 		packageBox.setAlignment(Pos.CENTER);
 		
-		VBox cartBox = new VBox(10,
+		Button checkoutButton = new Button("Checkout");
+		
+		cartBox = new VBox(10,
 				 new Label("Available Candy:"), candyListView,
 		         quantityField, addToCartButton, clearCartButton,logOutButton, checkoutButton,
 		         packageBox, noPackageOption,
 		         new Label("Your Cart:"), cartListView, totalLabel);
-		         cartBox.setPadding(new Insets(20));  
-		         cartBox.setAlignment(Pos.CENTER);
-		         
+		cartBox.setPadding(new Insets(20));  
+		cartBox.setAlignment(Pos.CENTER);
+		    
         borderPane.setTop(top);
 		borderPane.setBottom(bottom);
 		borderPane.setLeft(left);
 		borderPane.setRight(right);
 		borderPane.setCenter(loginBox);
+		
 		List<Customer> customers = new ArrayList<>();
 		customers.add(new Customer("mary", "5432"));
 		customers.add(new Customer("bob", "password"));
@@ -300,6 +311,7 @@ public class TestFX extends Application {
         	String username = usernameField.getText().trim();
         	String password = passwordField.getText().trim();
         	boolean valid = false;
+        	
         	for (Customer c : customers) {
         		if (c.authenticate(username, password)) {
         			messageLabel.setText("Welcome, " + c.getUsername() + "!");
@@ -308,8 +320,13 @@ public class TestFX extends Application {
         			
         			CustomerDashboard dashboardScreen = new CustomerDashboard(c,
         					borderPane, cartBox, loginBox);
+        			
+        			checkoutButton.setOnAction(ev -> processCheckout(cartItems, totalLabel,
+        					cartListView, borderPane, loginBox, c,
+        			dashboardScreen.getView()
+        			));
         			// CartView
-        			borderPane.setCenter(cartBox); //replaces login screen
+        			borderPane.setCenter(dashboardScreen.getView());
         			break;
         		}
         	}

@@ -1,16 +1,10 @@
-
-/**
- * Write a description of interface Candy here.
- * Uses polymorphism --allows for different types of candy to be handled
- * @author (Kelly Payne)
- * @version (10/5/2025)
- */
-public interface Candy
-{
-    String getName();
+//Uses polymorphism --allows for different types of candy to be handled
+// Author: Kelly Payne 10/5/25
+public interface Candy {
+	String getName();
     double getWeight();
     double getPrice();
-    void setPrice(double price);
     int getQuantity();
     void prepare();
+    void setPrice(double price); //added setter
 }
