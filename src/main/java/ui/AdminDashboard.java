@@ -29,6 +29,7 @@ public class AdminDashboard extends Application {
     private DashboardStatsManager statsManager;
     private OrderDataManager orderData;
     private UserManager userManager;
+    private InventoryService inventoryService;
 
     // UI Components
     private BorderPane mainLayout;
@@ -43,6 +44,7 @@ public class AdminDashboard extends Application {
 
     // Table Views
     private OrderTableView orderTable;
+    private InventoryTableView inventoryTable;
 
     // Current user
     private UserAccount currentUser;
@@ -98,25 +100,32 @@ public class AdminDashboard extends Application {
     }
 
     private void initializeServices() {
+        // Initialize backend facade
+        BackendFacade.init();
+        BackendFacade.setLowStockThreshold(10);
+
+        // Get inventory service from facade
+        inventoryService = BackendFacade.getInventoryService();
+
+        // Subscribe to low stock notifications
+        BackendFacade.onLowStock((productId, qty) -> {
+            System.out.println("⚠️ LOW STOCK ALERT: " + productId + " has only " + qty + " units!");
+            // Refresh stats cards when low stock is detected
+            javafx.application.Platform.runLater(() -> {
+                if (inventoryValueCard != null) inventoryValueCard.refresh();
+                if (lowStockCard != null) lowStockCard.refresh();
+            });
+        });
+
         orderData = new OrderDataManager();
         CustomerDataManager customerData = new CustomerDataManager();
-
-        // Initialize inventory service
-        InventorySubject inventorySubject = new InventorySubject();
-        InventoryService inventoryService = new InventoryService(inventorySubject);
-
-        // Initialize some sample product prices (in real app, load from catalog)
-        Map<String, Double> productPrices = new HashMap<>();
-        productPrices.put("P001", 2.50);
-        productPrices.put("P002", 3.99);
-        productPrices.put("P003", 1.99);
-
-        // Set some sample stock levels
-        inventoryService.setStock("P001", 150);
-        inventoryService.setStock("P002", 8);  // Low stock
-        inventoryService.setStock("P003", 200);
-
         userManager = UserManager.getInstance();
+
+        // Build product prices map from inventory data for stats manager
+        Map<String, Double> productPrices = new HashMap<>();
+        for (model.InventoryItem item : inventoryService.getAllItems()) {
+            productPrices.put(item.getName(), item.getPrice());
+        }
 
         statsManager = new DashboardStatsManager(
             orderData, customerData, inventoryService, productPrices
@@ -175,15 +184,15 @@ public class AdminDashboard extends Application {
         inventoryValueCard = new StatsCard(
             "Total Inventory Value",
             "📦",
-            () -> String.format("$%.2f", statsManager.getTotalInventoryValue()),
-            () -> "3 products"
+            () -> String.format("$%.2f", inventoryService.getTotalInventoryValue()),
+            () -> inventoryService.getAllItems().size() + " products"
         );
 
         lowStockCard = new StatsCard(
             "Low Stock Alert",
             "⚠️",
-            () -> statsManager.getLowStockItemCount() + " items",
-            () -> "Need restock"
+            () -> inventoryService.getLowStockItemCount() + " items",
+            () -> "Threshold: ≤ 10"
         );
 
         ordersCard = new StatsCard(
@@ -219,13 +228,10 @@ public class AdminDashboard extends Application {
         Tab ordersTab = new Tab("Orders", orderTable);
         ordersTab.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        // Inventory Tab (placeholder)
-        Label inventoryPlaceholder = new Label("Inventory management coming soon...");
-        inventoryPlaceholder.setStyle("-fx-font-size: 16px; -fx-text-fill: " + ColorConstants.TEXT_SECONDARY + ";");
-        VBox inventoryBox = new VBox(inventoryPlaceholder);
-        inventoryBox.setAlignment(Pos.CENTER);
-        inventoryBox.setPadding(new Insets(50));
-        Tab inventoryTab = new Tab("Inventory", inventoryBox);
+        // Inventory Tab
+        inventoryTable = new InventoryTableView(inventoryService);
+        Tab inventoryTab = new Tab("Inventory", inventoryTable);
+        inventoryTab.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         // Users Tab (placeholder)
         Label usersPlaceholder = new Label("User management coming soon...");
