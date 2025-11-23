@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import model.InventoryItem;
 import model.StockStatus;
 import service.InventoryService;
+import ui.components.factory.StockStatusBadgeFactory;
 import util.ColorConstants;
 
 import java.io.IOException;
@@ -124,8 +125,7 @@ public class InventoryTableView extends TableView<InventoryItem> {
                 if (empty || quantity == null) {
                     setGraphic(null);
                 } else {
-                    StockStatus status = StockStatus.fromQuantity(quantity, lowStockThreshold);
-                    setGraphic(new StockStatusBadge(status));
+                    setGraphic(StockStatusBadgeFactory.getInstance().createBadgeFromQuantity(quantity, lowStockThreshold));
                 }
             }
         });
