@@ -21,8 +21,6 @@ import java.util.function.BiConsumer;
  *   BackendFacade.init();
  *   Order o = BackendFacade.checkout(userId, cartItems, discounts);
  *
- * @author Travis Dagostino
- * @version 1.0
  * @since 2025-11-22
  */
 public final class BackendFacade {
