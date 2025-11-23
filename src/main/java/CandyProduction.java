@@ -9,7 +9,7 @@ public class CandyProduction {
 	       pack.pack(candy);
 	       
 	       Inventory inventory = Inventory.getInstance(); // Singleton pattern
-	       inventory.addCandy(candy.getName(), 1);
+	       inventory.addCandy(candy, 1);
 	       // show current inventory
 	       inventory.displayInventory();
 	   }

@@ -29,7 +29,8 @@ public class ConsoleUI {
 		cart.viewCart();
 		PricingCommand pricing = new RegPricingCommand();
 		Checkout processor = new Checkout(pricing);
-		processor.checkout(cart.getItems());
+		Customer customer = new Customer("Guest", "guest@example.com");
+		processor.checkout(customer, cart);
 	}
 	private void handleAddToCart(int choice) {
 		InventoryItem selectedItem = store.getInventoryItemByIndex(choice -1);

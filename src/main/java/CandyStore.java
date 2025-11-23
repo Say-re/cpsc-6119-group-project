@@ -100,9 +100,9 @@ public class CandyStore {
 		   catalog.add(gummy);
 		   catalog.add(chocolate);
 		   catalog.add(hard);
-		   inventory.addCandy(gummy.getName(), 15);
-		   inventory.addCandy(chocolate.getName(), 20);
-		   inventory.addCandy(hard.getName(), 10);
+		   inventory.addCandy(gummy, 15);
+		   inventory.addCandy(chocolate, 20);
+		   inventory.addCandy(hard, 10);
 	   }
 	  
 }

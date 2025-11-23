@@ -157,7 +157,7 @@ public class CandyStoreApp {
                     Candy candy = factory.createCandy();
                     candy.prepare();
                     for (int i = 0; i < quantity; i++) {
-                        inventory.addCandy(name, 1);
+                        inventory.addCandy(candy, 1);
                         totalAdded++;
                     }
                 }
