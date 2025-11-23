@@ -20,8 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Admin Dashboard for Sweet Factory
- * Displays inventory, orders, and user statistics
+ * Admin Dashboard for Sweet Factory.
+ * Displays inventory, orders, and user statistics with management capabilities.
+ * Integrates with BackendFacade for inventory management and observer pattern.
+ *
+ * @author Travis Dagostino
+ * @since 2025-11-22
  */
 public class AdminDashboard extends Application {
 
@@ -45,18 +49,33 @@ public class AdminDashboard extends Application {
     // Table Views
     private OrderTableView orderTable;
     private InventoryTableView inventoryTable;
+    private UserTableView userTable;
 
     // Current user
     private UserAccount currentUser;
 
+    /**
+     * Default constructor for AdminDashboard.
+     * Current user will be set from login.
+     */
     public AdminDashboard() {
         this.currentUser = null; // Will be set from login
     }
 
+    /**
+     * Constructor with specified user.
+     *
+     * @param user The currently logged-in user account
+     */
     public AdminDashboard(UserAccount user) {
         this.currentUser = user;
     }
 
+    /**
+     * Starts the JavaFX application and displays the admin dashboard.
+     *
+     * @param primaryStage The primary stage for this application
+     */
     @Override
     public void start(Stage primaryStage) {
         initializeServices();
@@ -99,6 +118,10 @@ public class AdminDashboard extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Initializes backend services and subscribes to inventory notifications.
+     * Sets up BackendFacade, InventoryService, and DashboardStatsManager.
+     */
     private void initializeServices() {
         // Initialize backend facade
         BackendFacade.init();
@@ -132,6 +155,11 @@ public class AdminDashboard extends Application {
         );
     }
 
+    /**
+     * Creates the header section with logo, title, and logout button.
+     *
+     * @return VBox containing the header components
+     */
     private VBox createHeader() {
         VBox header = new VBox(12);
         header.setPadding(new Insets(16, 32, 16, 32));
@@ -177,6 +205,11 @@ public class AdminDashboard extends Application {
         return header;
     }
 
+    /**
+     * Creates the statistics cards for inventory, low stock, orders, and users.
+     *
+     * @return HBox containing all stats cards
+     */
     private HBox createStatsCards() {
         HBox container = new HBox(16);
         container.setAlignment(Pos.CENTER);
@@ -203,10 +236,10 @@ public class AdminDashboard extends Application {
         );
 
         usersCard = new StatsCard(
-            "Active Users",
+            "Total Users",
             "👥",
-            () -> String.valueOf(statsManager.getActiveUserCount()),
-            () -> "users"
+            () -> String.valueOf(userManager.getAllUsers().size()),
+            () -> "registered"
         );
 
         container.getChildren().addAll(inventoryValueCard, lowStockCard, ordersCard, usersCard);
@@ -218,6 +251,11 @@ public class AdminDashboard extends Application {
         return container;
     }
 
+    /**
+     * Creates the tabbed pane with Orders, Inventory, and Users tabs.
+     *
+     * @return TabPane containing all management tabs
+     */
     private TabPane createTabs() {
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -233,19 +271,20 @@ public class AdminDashboard extends Application {
         Tab inventoryTab = new Tab("Inventory", inventoryTable);
         inventoryTab.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        // Users Tab (placeholder)
-        Label usersPlaceholder = new Label("User management coming soon...");
-        usersPlaceholder.setStyle("-fx-font-size: 16px; -fx-text-fill: " + ColorConstants.TEXT_SECONDARY + ";");
-        VBox usersBox = new VBox(usersPlaceholder);
-        usersBox.setAlignment(Pos.CENTER);
-        usersBox.setPadding(new Insets(50));
-        Tab usersTab = new Tab("Users", usersBox);
+        // Users Tab
+        userTable = new UserTableView(userManager);
+        Tab usersTab = new Tab("Users", userTable);
+        usersTab.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         tabPane.getTabs().addAll(ordersTab, inventoryTab, usersTab);
 
         return tabPane;
     }
 
+    /**
+     * Handles the logout action.
+     * Closes the dashboard and returns to login page.
+     */
     private void handleLogout() {
         // Close dashboard
         Stage stage = (Stage) mainLayout.getScene().getWindow();
@@ -262,6 +301,11 @@ public class AdminDashboard extends Application {
         }
     }
 
+    /**
+     * Main method to launch the Admin Dashboard application.
+     *
+     * @param args Command line arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }

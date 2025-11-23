@@ -8,9 +8,12 @@ import java.security.SecureRandom;
 import java.util.*;
 
 /**
- * UserManager
- * Handles user authentication, account creation, and CSV storage
- * Uses SHA-256 with salt for password hashing
+ * UserManager - Singleton class for managing user accounts.
+ * Handles user authentication, account creation, and CSV storage.
+ * Uses SHA-256 with salt for password hashing.
+ *
+ * @author Travis Dagostino
+ * @since 2025-11-22
  */
 public class UserManager {
     private static final String CSV_FILE = "src/main/java/data/users.csv";
@@ -30,7 +33,9 @@ public class UserManager {
     }
 
     /**
-     * Singleton pattern to ensure single instance
+     * Singleton pattern to ensure single instance.
+     *
+     * @return The singleton UserManager instance
      */
     public static UserManager getInstance() {
         if (instance == null) {
@@ -40,7 +45,8 @@ public class UserManager {
     }
 
     /**
-     * Initialize default admin and customer accounts
+     * Initialize default admin and customer accounts.
+     * Only creates defaults if no users exist in the system.
      */
     private void initializeDefaultAccounts() {
         // Only create defaults if no users exist
@@ -60,7 +66,8 @@ public class UserManager {
     }
 
     /**
-     * Load users from CSV file
+     * Load users from CSV file.
+     * Reads the users.csv file and populates the users map.
      */
     private void loadUsers() {
         File file = new File(CSV_FILE);
@@ -107,7 +114,8 @@ public class UserManager {
     }
 
     /**
-     * Save users to CSV file
+     * Save users to CSV file.
+     * Writes all user accounts to the users.csv file.
      */
     private void saveUsers() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(CSV_FILE))) {
@@ -132,7 +140,9 @@ public class UserManager {
     }
 
     /**
-     * Generate a random salt
+     * Generate a random salt for password hashing.
+     *
+     * @return Base64-encoded random salt
      */
     private String generateSalt() {
         SecureRandom random = new SecureRandom();
@@ -142,7 +152,11 @@ public class UserManager {
     }
 
     /**
-     * Hash a password with salt using SHA-256
+     * Hash a password with salt using SHA-256.
+     *
+     * @param password The plaintext password
+     * @param salt The salt to use for hashing
+     * @return Base64-encoded hashed password
      */
     private String hashPassword(String password, String salt) {
         try {
@@ -156,7 +170,15 @@ public class UserManager {
     }
 
     /**
-     * Create a new user account
+     * Create a new user account.
+     *
+     * @param username The username for the new account
+     * @param password The plaintext password
+     * @param role The user role ("admin" or "customer")
+     * @param email The email address
+     * @param recoveryQuestion Security question for password recovery
+     * @param recoveryAnswer Answer to the security question
+     * @return true if user was created successfully, false if username already exists
      */
     public boolean createUser(String username, String password, String role, String email,
                              String recoveryQuestion, String recoveryAnswer) {
@@ -181,7 +203,11 @@ public class UserManager {
     }
 
     /**
-     * Authenticate a user
+     * Authenticate a user with username and password.
+     *
+     * @param username The username to authenticate
+     * @param password The plaintext password to verify
+     * @return UserAccount object if authentication successful, null otherwise
      */
     public UserAccount authenticate(String username, String password) {
         UserAccount account = users.get(username);
@@ -200,21 +226,31 @@ public class UserManager {
     }
 
     /**
-     * Check if username exists
+     * Check if username exists.
+     *
+     * @param username The username to check
+     * @return true if username exists, false otherwise
      */
     public boolean userExists(String username) {
         return users.containsKey(username);
     }
 
     /**
-     * Get user by username
+     * Get user by username.
+     *
+     * @param username The username to retrieve
+     * @return UserAccount object if found, null otherwise
      */
     public UserAccount getUser(String username) {
         return users.get(username);
     }
 
     /**
-     * Update user password
+     * Update user password.
+     *
+     * @param username The username whose password to update
+     * @param newPassword The new plaintext password
+     * @return true if password was updated successfully, false if user not found
      */
     public boolean updatePassword(String username, String newPassword) {
         UserAccount account = users.get(username);
@@ -233,7 +269,11 @@ public class UserManager {
     }
 
     /**
-     * Validate recovery answer for password recovery
+     * Validate recovery answer for password recovery.
+     *
+     * @param username The username to validate
+     * @param answer The plaintext answer to verify
+     * @return true if answer is correct, false otherwise
      */
     public boolean validateRecoveryAnswer(String username, String answer) {
         UserAccount account = users.get(username);
@@ -248,5 +288,41 @@ public class UserManager {
 
         String answerHash = hashPassword(answer.toLowerCase().trim(), answerSalt);
         return answerHash.equals(account.getRecoveryAnswerHash());
+    }
+
+    /**
+     * Get all user accounts.
+     *
+     * @return List of all UserAccount objects
+     * @author Travis Dagostino
+     * @since 2025-11-22
+     */
+    public List<UserAccount> getAllUsers() {
+        return new ArrayList<>(users.values());
+    }
+
+    /**
+     * Update user role (admin or customer).
+     *
+     * @param username The username of the account to update
+     * @param newRole The new role ("admin" or "customer")
+     * @return true if role was updated successfully, false if user not found
+     * @author Travis Dagostino
+     * @since 2025-11-22
+     */
+    public boolean updateUserRole(String username, String newRole) {
+        UserAccount account = users.get(username);
+        if (account == null) {
+            return false;
+        }
+
+        // Validate role
+        if (!newRole.equals("admin") && !newRole.equals("customer")) {
+            return false;
+        }
+
+        account.setRole(newRole);
+        saveUsers();
+        return true;
     }
 }
