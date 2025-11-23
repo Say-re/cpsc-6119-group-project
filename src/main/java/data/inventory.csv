@@ -1,5 +1,5 @@
 name,type,price,quantity
-gummy bears,gummy,1.75,20
+gummy bears,gummy,1.75,5000
 lollipop,hard,0.75,20
 candy bar,chocolate,1.5,25
 gummy worms,gummy,1.75,20
@@ -14,5 +14,5 @@ chocolate covered cherries,chocolate,2.5,15
 fudge,chocolate,4.5,10
 jolly ranchers,hard,3,10
 sour drops,hard,1.75,15
-reeces peanutbutter cups,chocolate,3,20
+reeces peanutbutter cups,chocolate,3.00,1
 gum drops,gummy,1.75,10

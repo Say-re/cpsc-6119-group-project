@@ -8,6 +8,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.beans.property.SimpleStringProperty;
 import managers.DashboardStatsManager;
 import model.*;
+import ui.components.factory.OrderStatusBadgeFactory;
 import util.DateFormatter;
 
 import java.time.Instant;
@@ -71,7 +72,7 @@ public class OrderTableView extends TableView<OrderDisplayModel> {
                 if (empty || status == null) {
                     setGraphic(null);
                 } else {
-                    setGraphic(new StatusBadge(status));
+                    setGraphic(OrderStatusBadgeFactory.getInstance().createOrderStatusBadge(status));
                 }
             }
         });
