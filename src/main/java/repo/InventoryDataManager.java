@@ -66,7 +66,6 @@ public class InventoryDataManager {
      * If the item is new, it will be added.
      *
      * @param item The InventoryItem to save or update
-     * @throws IOException If there is an error writing to the CSV file
      */
     public void saveItem(InventoryItem item) throws IOException {
         List<String[]> rows = CsvUtil.read(INVENTORY_FILE);
@@ -115,7 +114,6 @@ public class InventoryDataManager {
      * Deletes an inventory item by name from the CSV file.
      *
      * @param name The name of the item to delete (case-insensitive)
-     * @throws IOException If there is an error writing to the CSV file
      */
     public void deleteItem(String name) throws IOException {
         List<String[]> rows = CsvUtil.read(INVENTORY_FILE);

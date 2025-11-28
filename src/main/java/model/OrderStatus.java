@@ -1,12 +1,12 @@
 package model;
-
+import util.ColorConstants;
 public enum OrderStatus {
-    PLACED("Pending", "#FEF3C7", "#92400E"),      // yellow bg, dark text
-    PAID("Processing", "#DBEAFE", "#1E40AF"),      // blue bg, dark text
-    PACKING("Processing", "#DBEAFE", "#1E40AF"),   // blue bg, dark text
-    SHIPPED("In Transit", "#E0E7FF", "#3730A3"),   // indigo bg, dark text
-    DELIVERED("Completed", "#D1FAE5", "#065F46"),  // green bg, dark text
-    CANCELLED("Cancelled", "#FEE2E2", "#991B1B");  // red bg, dark text
+    PLACED("Pending", ColorConstants.STATUS_PENDING_BG, ColorConstants.STATUS_PENDING_TEXT),      // yellow bg, dark text
+    PAID("Processing", ColorConstants.STATUS_PROCESSING_BG, ColorConstants.STATUS_PROCESSING_TEXT),      // blue bg, dark text
+    PACKING("Processing", ColorConstants.STATUS_PROCESSING_BG, ColorConstants.STATUS_PROCESSING_TEXT),   // blue bg, dark text
+    SHIPPED("In Transit", ColorConstants.STATUS_IN_TRANSIT_BG, ColorConstants.STATUS_IN_TRANSIT_TEXT),   // indigo bg, dark text
+    DELIVERED("Completed", ColorConstants.STATUS_COMPLETED_BG, ColorConstants.STATUS_COMPLETED_TEXT),  // green bg, dark text
+    CANCELLED("Cancelled", ColorConstants.STATUS_CANCELLED_BG, ColorConstants.STATUS_CANCELLED_TEXT);  // red bg, dark text
 
     private final String displayName;
     private final String backgroundColor;

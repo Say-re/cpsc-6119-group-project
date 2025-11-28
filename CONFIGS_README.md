@@ -49,8 +49,6 @@ candy-store-app/
 │   ├── main/
 │   │   ├── java/             # Java source files
 │   │   └── resources/        # Resources (CSS, images, etc.)
-│   └── test/
-│       └── java/             # Test files
 ├── build/                    # Build output 
 ```
 
@@ -64,13 +62,13 @@ Runs the LoginPage JavaFX application:
 mvn javafx:run -Plogin-ui
 ```
 
-### 2. `demo-be` Profile
+### 2. `demo-be` Profile - DEPRECATED
 Run the sample Demo BE file to validate functionality for back-end
 ```bash
 mvn javafx:run -Pdemo-be
 ```
 
-### 3. `main-app` Profile (Default)
+### 3. `main-app` Profile (Default) - DEPRECATED
 Runs the CandyStoreApp console application:
 ```bash
 mvn javafx:run
