@@ -12,6 +12,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 // chatgpt helped with dugging and some code, but I used the TestFX example also
 public class CustomerDashboard implements UIScreen{ //Factory Pattern
 	private VBox dashboard;
@@ -89,8 +91,13 @@ public class CustomerDashboard implements UIScreen{ //Factory Pattern
             borderPane.setCenter(profileBox);
         });
         
-        logoutButton.setOnAction(e -> borderPane.setCenter(loginBox));
-		
+        logoutButton.setOnAction(e -> {
+            // Close the application instead of returning to login
+            Stage stage = (Stage) borderPane.getScene().getWindow();
+            stage.close();
+            Platform.exit();
+        });
+
         dashboard = new VBox(15, welcomeLabel, shopButton, ordersButton, profileButton, logoutButton);
         dashboard.setAlignment(Pos.CENTER);
         dashboard.setPadding(new Insets(20));

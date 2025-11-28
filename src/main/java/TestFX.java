@@ -1,5 +1,6 @@
 // chatgpt helped me greatly with this class as I have never done an UI other than text based.
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +34,16 @@ public class TestFX extends Application {
 	private List<Candy> cart = new ArrayList<>();
 	{cart.size();}
 	private double totalPrice = 0.0;
+
+	// Store username passed from CustomerDashboard
+	private String externalUsername = null;
+
+	/**
+	 * Sets the username from the external login (CustomerDashboard)
+	 */
+	public void setExternalUsername(String username) {
+		this.externalUsername = username;
+	}
 	//private TextFormatter<Integer> formatter;
 	private void clearCart(ObservableList<Candy> cartItems, Label totalLabel) {
 		cartItems.clear(); // clears UI list
@@ -280,7 +291,9 @@ public class TestFX extends Application {
         Button logOutButton = new Button("Log Out");
 		logOutButton.setOnAction(e -> {
 			clearCart(cartItems, totalLabel); // clears cart when log out
-			borderPane.setCenter(loginBox); // goes back to login screen
+			// Close the application instead of returning to login
+			stage.close();
+			Platform.exit();
 		});
 		HBox packageBox = new HBox(10, packageLabel, boxOption, bagOption);
 		packageBox.setAlignment(Pos.CENTER);
@@ -304,37 +317,56 @@ public class TestFX extends Application {
 		List<Customer> customers = new ArrayList<>();
 		customers.add(new Customer("mary", "5432"));
 		customers.add(new Customer("bob", "password"));
-		
-		borderPane.setCenter(loginBox); 
-        //Handle login
-        loginButton.setOnAction(e->{
-        	String username = usernameField.getText().trim();
-        	String password = passwordField.getText().trim();
-        	boolean valid = false;
-        	
-        	for (Customer c : customers) {
-        		if (c.authenticate(username, password)) {
-        			messageLabel.setText("Welcome, " + c.getUsername() + "!");
-        			messageLabel.setTextFill(Color.DARKGREY);
-        			valid = true;
-        			
-        			CustomerDashboard dashboardScreen = new CustomerDashboard(c,
-        					borderPane, cartBox, loginBox);
-        			
-        			checkoutButton.setOnAction(ev -> processCheckout(cartItems, totalLabel,
-        					cartListView, borderPane, loginBox, c,
-        			dashboardScreen.getView()
-        			));
-        			// CartView
-        			borderPane.setCenter(dashboardScreen.getView());
-        			break;
-        		}
-        	}
-        	if (!valid) {
-        		messageLabel.setText("Invalid username or password");
-        		messageLabel.setTextFill(Color.RED);
-        	}
-        });
+
+		// Use the external username if provided from LoginPage, otherwise use a guest
+		if (externalUsername != null && !externalUsername.isEmpty()) {
+			loggedInCustomer = new Customer(externalUsername, "");
+		} else {
+			loggedInCustomer = new Customer("guest", "");
+		}
+
+		// Create CustomerDashboard with the logged-in customer
+		CustomerDashboard dashboardScreen = new CustomerDashboard(loggedInCustomer, borderPane, cartBox, loginBox);
+
+		// Configure checkout button with the logged-in customer and dashboard view
+		checkoutButton.setOnAction(ev -> {
+			processCheckout(cartItems, totalLabel, cartListView, borderPane, loginBox, loggedInCustomer, dashboardScreen.getView());
+		});
+
+		// Display the CustomerDashboard view instead of login
+		borderPane.setCenter(dashboardScreen.getView());
+
+		// Comment out login flow - not needed when launched from CustomerDashboard
+        // borderPane.setCenter(loginBox);
+        // //Handle login
+        // loginButton.setOnAction(e->{
+        // 	String username = usernameField.getText().trim();
+        // 	String password = passwordField.getText().trim();
+        // 	boolean valid = false;
+        //
+        // 	for (Customer c : customers) {
+        // 		if (c.authenticate(username, password)) {
+        // 			messageLabel.setText("Welcome, " + c.getUsername() + "!");
+        // 			messageLabel.setTextFill(Color.DARKGREY);
+        // 			valid = true;
+        //
+        // 			CustomerDashboard dashboardScreen = new CustomerDashboard(c,
+        // 					borderPane, cartBox, loginBox);
+        //
+        // 			checkoutButton.setOnAction(ev -> processCheckout(cartItems, totalLabel,
+        // 					cartListView, borderPane, loginBox, c,
+        // 			dashboardScreen.getView()
+        // 			));
+        // 			// CartView
+        // 			borderPane.setCenter(dashboardScreen.getView());
+        // 			break;
+        // 		}
+        // 	}
+        // 	if (!valid) {
+        // 		messageLabel.setText("Invalid username or password");
+        // 		messageLabel.setTextFill(Color.RED);
+        // 	}
+        // });
         
         //Scene setup
         Scene scene = new Scene(borderPane, 400, 300);
