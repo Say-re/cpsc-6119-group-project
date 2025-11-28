@@ -1,6 +1,7 @@
 //chatgpt helped me some with this class - some of it was learned while doing TestFx
 import javafx.geometry.Pos;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javafx.geometry.Insets;
 import javafx.scene.text.Font;
@@ -14,6 +15,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import service.BackendFacade;
+import model.Order;
+import model.OrderItem;
 // chatgpt helped with dugging and some code, but I used the TestFX example also
 public class CustomerDashboard implements UIScreen{ //Factory Pattern
 	private VBox dashboard;
@@ -34,24 +38,31 @@ public class CustomerDashboard implements UIScreen{ //Factory Pattern
         	VBox ordersBox = new VBox(10);
         	ordersBox.setAlignment(Pos.CENTER);
         	ordersBox.setPadding(new Insets(20));
-        	
+
         	Label title = new Label("Order History");
         	title.setFont(Font.font("Verdana", javafx.scene.text.FontWeight.BOLD, 18));
         	ordersBox.getChildren().add(title);
-        	        	
-            List<Order> customerOrders = customer.getOrders();
+
+            // Get orders from BackendFacade instead of Customer object
+            List<model.Order> customerOrders = BackendFacade.ordersForUser(customer.getUsername());
             if (customerOrders.isEmpty()) {
             	ordersBox.getChildren().add(new Label("Order history is empty"));
             } else {
-            	for (Order order : customerOrders) {
+            	for (model.Order order : customerOrders) {
             		StringBuilder orderDetails = new StringBuilder();
-            		orderDetails.append("Order placed: ").append(order.getOrderTime()).append("\n");
+            		orderDetails.append("Order ID: ").append(order.getId()).append("\n");
+            		orderDetails.append("Order placed: ").append(
+            			order.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+            			.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+            		).append("\n");
             		orderDetails.append("Items:\n");
-            		for (Candy candy : order.getItems()) {
-            			orderDetails.append("- ").append(candy.getName())
-            						.append(" ($").append(candy.getPrice()).append(")\n");
+            		for (OrderItem item : order.getItems()) {
+            			orderDetails.append("- ").append(item.getName())
+            						.append(" x").append(item.getQty())
+            						.append(" ($").append(String.format("%.2f", item.getUnitPrice())).append(")\n");
             		}
-            		
+            		orderDetails.append("Total: $").append(String.format("%.2f", order.getGrandTotal()));
+
             		Label orderLabel = new Label(orderDetails.toString());
             		orderLabel.setWrapText(true);
             		ordersBox.getChildren().add(orderLabel);
@@ -59,10 +70,10 @@ public class CustomerDashboard implements UIScreen{ //Factory Pattern
             }
             HBox buttonBox = new HBox(10);
             buttonBox.setAlignment(Pos.CENTER);
-            
+
             Button backButton = new Button("Back to Dashboard");
             backButton.setOnAction(ev -> borderPane.setCenter(dashboard));
-            
+
             buttonBox.getChildren().addAll(backButton, logoutButton);
             ordersBox.getChildren().add(buttonBox);
             borderPane.setCenter(ordersBox);
