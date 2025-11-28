@@ -7,8 +7,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import managers.DashboardStatsManager;
-import model.OrderStatus;
-import patterns.observer.InventorySubject;
 import repo.*;
 import service.*;
 import ui.components.*;

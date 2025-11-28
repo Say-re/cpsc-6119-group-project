@@ -8,6 +8,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 /**
+ * ************* SINGLETON EXAMPLE **********************
  * UserManager - Singleton class for managing user accounts.
  * Handles user authentication, account creation, and CSV storage.
  * Uses SHA-256 with salt for password hashing.
@@ -173,7 +174,7 @@ public class UserManager {
      * Create a new user account.
      *
      * @param username The username for the new account
-     * @param password The plaintext password
+     * @param password The password
      * @param role The user role ("admin" or "customer")
      * @param email The email address
      * @param recoveryQuestion Security question for password recovery
@@ -206,7 +207,7 @@ public class UserManager {
      * Authenticate a user with username and password.
      *
      * @param username The username to authenticate
-     * @param password The plaintext password to verify
+     * @param password The password to verify
      * @return UserAccount object if authentication successful, null otherwise
      */
     public UserAccount authenticate(String username, String password) {

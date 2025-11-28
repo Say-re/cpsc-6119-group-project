@@ -10,6 +10,8 @@ import java.util.*;
 /**
  * Aggregates statistics from various services for dashboard display
  * Implements caching to avoid excessive file I/O
+ * @author Travis Dagostino
+ * @since 11-28-25
  */
 public class DashboardStatsManager {
     private final OrderDataManager orderData;

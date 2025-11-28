@@ -22,15 +22,23 @@ public class ColorConstants {
     public static final String BG_LIGHT_PINK = "#FFF0F5";
 
     // Status Colors (matching OrderStatus)
+    // PLACED - Pending (yellow bg, dark text)
     public static final String STATUS_PENDING_BG = "#FEF3C7";
     public static final String STATUS_PENDING_TEXT = "#92400E";
 
+    // PAID & PACKING - Processing (blue bg, dark text)
     public static final String STATUS_PROCESSING_BG = "#DBEAFE";
     public static final String STATUS_PROCESSING_TEXT = "#1E40AF";
 
+    // SHIPPED - In Transit (indigo bg, dark text)
+    public static final String STATUS_IN_TRANSIT_BG = "#E0E7FF";
+    public static final String STATUS_IN_TRANSIT_TEXT = "#3730A3";
+
+    // DELIVERED - Completed (green bg, dark text)
     public static final String STATUS_COMPLETED_BG = "#D1FAE5";
     public static final String STATUS_COMPLETED_TEXT = "#065F46";
 
+    // CANCELLED - Cancelled (red bg, dark text)
     public static final String STATUS_CANCELLED_BG = "#FEE2E2";
     public static final String STATUS_CANCELLED_TEXT = "#991B1B";
 

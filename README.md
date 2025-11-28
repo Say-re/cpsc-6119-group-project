@@ -28,9 +28,9 @@ The project is structured with a strong focus on **Object-Oriented Design (OOD)*
 ## Design Patterns Implemented
 | Pattern | Purpose |
 |----------|----------|
-| **Factory Pattern** | Dynamically creates different candy types (e.g., Chocolate, Gummy, Hard Candy). |
+| **Factory Pattern** | Dynamically creates different candy types (e.g., Chocolate, Gummy, Hard Candy). Additionally used for creating badges for the order tracking within the admin dashboard. |
 | **Observer Pattern** | Notifies users/systems when inventory levels change or when an order is updated. |
-| **Singleton Pattern** | Ensures one instance of the main database/order manager. |
+| **Singleton Pattern** | Ensures one instance of the main database/order manager and for user management. |
 | **Decorator Pattern** | Adds extra features to candies (e.g., packaging, discounts, or seasonal themes) without altering core classes. |
 
 ---
@@ -46,11 +46,11 @@ The project is structured with a strong focus on **Object-Oriented Design (OOD)*
 ## Development Details
 - **Language:** Java  
 - **IDE Compatibility:** BlueJ, Visual Studio Code, IntelliJ  
-- **Build Tool (Recommended):** Gradle or Maven  
+- **Build Tool (Recommended):** Maven  
 - **Version Control:** Git & GitHub (branch-based workflow)  
 
 ---
 
 ## Branching & Collaboration Workflow
-Each team member works on their **own feature branch**, then submits a **Pull Request (PR)** for review before merging into `main`.
+Each team member works on their **own feature branch**, then submits a **Pull Request (PR)** for review before merging into `master`.
 
