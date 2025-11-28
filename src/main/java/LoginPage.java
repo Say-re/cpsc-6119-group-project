@@ -8,7 +8,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import service.BackendFacade;
 import ui.AdminDashboard;
-import ui.CustomerDashboard;
 import auth.UserManager;
 import auth.UserAccount;
 
@@ -870,18 +869,25 @@ private void showAdminDashboard(UserAccount account) {
 }
 
 /**
- * Redirects customer users to the Customer Dashboard
+ * Redirects customer users to the Customer Dashboard via TestFX
  */
 private void showCustomerDashboard(UserAccount account) {
     try {
-        // Create CustomerDashboard instance with current user
-        CustomerDashboard dashboard = new CustomerDashboard(account);
-
         // Reuse the same stage the login page is using
         Stage stage = (Stage) mainContainer.getScene().getWindow();
 
-        // Start the customer dashboard UI on that stage
-        dashboard.start(stage);
+        // Use reflection to access TestFX from default package
+        Class<?> testFxClass = Class.forName("TestFX");
+        Application testFxApp = (Application) testFxClass.getDeclaredConstructor().newInstance();
+
+        // Set the username in TestFX if available
+        if (account != null) {
+            java.lang.reflect.Method setUsernameMethod = testFxClass.getMethod("setExternalUsername", String.class);
+            setUsernameMethod.invoke(testFxApp, account.getUsername());
+        }
+
+        // Start TestFX (which includes CustomerDashboard) in the current stage
+        testFxApp.start(stage);
 
         stage.setTitle("Sweet Factory — Customer Dashboard");
         stage.show();
