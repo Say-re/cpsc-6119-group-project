@@ -32,38 +32,10 @@
 
     <!-- Dependencies -->
     <dependencies>
-        <!-- JavaFX Core -->
+        <!-- JavaFX Core (includes graphics and base transitively) -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-
-        <!-- JavaFX FXML (for UI layouts) -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-
-        <!-- JavaFX Graphics (included by controls, but explicit for clarity) -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-
-        <!-- JavaFX Media (for multimedia support) -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-media</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-
-        <!-- JavaFX Web (for web content) -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
             <version>${javafx.version}</version>
         </dependency>
 
