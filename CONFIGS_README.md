@@ -19,7 +19,7 @@ mvn clean javafx:run
 ```
 or
 ```bash
-mvn clean javafx:run -Pmain-app
+mvn clean javafx:run -P main-app
 ```
 
 ### 3. Compile the Project
@@ -68,7 +68,7 @@ Run the sample Demo BE file to validate functionality for back-end
 mvn javafx:run -Pdemo-be
 ```
 
-### 3. `main-app` Profile (Default) - DEPRECATED
+### 3. `main-app` Profile (Default)
 Runs the CandyStoreApp console application:
 ```bash
 mvn javafx:run

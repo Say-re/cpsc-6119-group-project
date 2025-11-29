@@ -16,7 +16,7 @@ public class CandyStoreApp {
         
         List<Customer> customers = List.of(
         new Customer("mary", "5432"),
-        new Customer("william", "1234"));
+        new Customer("customer", "customer123"));
         
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to the Candy Store!");
