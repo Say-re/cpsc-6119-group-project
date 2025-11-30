@@ -1,9 +1,9 @@
 name,type,price,quantity
 gummy bears,gummy,1.75,4995
-lollipop,hard,0.75,15
+lollipop,hard,0.75,100
 candy bar,chocolate,1.5,25
-gummy worms,gummy,1.75,20
-sour gummy worms,gummy,2.00,15
+gummy worms,gummy,1.75,15
+sour gummy worms,gummy,2.00,11
 chocolate raisins,chocolate,2,20
 butterscotch disk,hard,1.75,15
 peppermint disk,hard,1.75,15
